@@ -1,0 +1,1 @@
+export const PYTHON_BACKEND_URL = "http://0.0.0.0:8080";
