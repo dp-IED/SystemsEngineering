@@ -20,8 +20,6 @@ Run the server, ollama, and client.
 1. Go to `http://localhost:3000/reconciliate` and upload the files in the `expense-showcase/files` directory.
 2. Submit and wait for the results.
 
-
-
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
