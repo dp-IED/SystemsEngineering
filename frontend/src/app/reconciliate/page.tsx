@@ -48,7 +48,7 @@ export default function Page() {
     setLoading(true);
     setError(null);
 
-    try {
+    try { //edit this part, add the extract function here
       const formData = new FormData();
       formData.append("csvFile", csvFile);
       formData.append("pdfFile", pdfFile);
