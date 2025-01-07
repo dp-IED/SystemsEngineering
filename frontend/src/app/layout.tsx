@@ -18,27 +18,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className="antialiased bg-background text-foreground font-sans">
         {/* Header */}
-        <header className="w-full bg-black flex items-center justify-between px-8 py-4 shadow-lg">
-          <div className="flex items-center gap-4">
-            <Image
-              src={ChanelLogo}
-              alt="Chanel Logo"
-              width={100}
-              height={100}
-              className="object-contain"
-            />
-          </div>
-          <div>
-            <Button className="p-0 bg-transparent border-none">
-              <Image
-                src="https://ok4static.oktacdn.com/fs/bco/1/fs012r07i1rX4ZtdW1t8"
-                alt="Coupa Logo"
-                width={160}
-                height={50}
-                className="rounded bg-white"
-              />
-            </Button>
-          </div>
+        <header className="w-full bg-black flex items-center justify-end px-8 py-4 shadow-lg">
+      
         </header>
 
         {/* Navigation Bar */}
