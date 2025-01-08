@@ -27,5 +27,13 @@ def upload_file_to_blob(file_path):
     
     print(f"{file_name} has been uploaded to {container_name} container.")
 
+def delete_file_from_blob(blob_name): 
+    try: # Create a blob client using the blob name 
+        blob_client = container_client.get_blob_client(blob_name) 
+        # Delete the blob 
+        blob_client.delete_blob() 
+        print(f"{blob_name} has been deleted from {container_name} container.") 
+    except Exception as ex: print(f"An error occurred: {ex}")
+
 # Example usage
 upload_file_to_blob(r"C:\Users\azire.AZIRET-LAPTOP\OneDrive - University College London\Year 2\Systems_engineering\2024 Budget Tracker 16.12.24 - ucl.xlsx")
