@@ -1,13 +1,17 @@
-import { hostname } from "os";
+/** @type {import('next').NextConfig} */
 
 const config = {
-  // Your Next.js config
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',  // Increase the limit to 3MB
+    },
+  },
   images: {
     remotePatterns: [
       {
         protocol: "https",
         hostname: "ok4static.oktacdn.com",
-        port:'',
+        port: '',
         pathname: "/fs/bco/1/fs012r07i1rX4ZtdW1t8",
       }
     ]
