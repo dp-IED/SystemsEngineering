@@ -12,11 +12,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <title>Chanel Expense Dashboard</title>
-        <meta name="description" content="Manage and analyze your expenses with the Chanel Expense Dashboard." />
+        <meta
+          name="description"
+          content="Manage and analyze your expenses with the Chanel Expense Dashboard."
+        />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </head>
-      <body className="antialiased bg-background text-foreground font-sans">
+      <body className="antialiased bg-background text-foreground font-sans min-h-screen flex flex-col">
         {/* Header */}
         <header className="w-full bg-black flex items-center justify-end px-8 py-4 shadow-lg">
       
@@ -26,13 +29,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <NavigationBar />
 
         {/* Main Content */}
-        <main className="container mx-auto py-6 px-4">
-          {children}
-        </main>
+        <main className="container mx-auto py-6 px-4 flex-grow">{children}</main>
 
         {/* Footer */}
-        <footer className="w-full bg-gray-900 text-white text-center py-4">
-          <p className="text-sm">© 2024 Chanel. All rights reserved.</p>
+        <footer className="mt-4 p-4 bg-slate-900 text-white text-center sticky bottom-0 w-full">
+          © 2024 Chanel. All rights reserved.
         </footer>
       </body>
     </html>
