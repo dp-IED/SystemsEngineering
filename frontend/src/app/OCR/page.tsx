@@ -21,15 +21,33 @@ const OCRPage = () => {
 
   // File Upload Component (receives setFile as a prop)
   const FileUpload = ({ setFile }: { setFile: (file: File) => void }) => {
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const selectedFile = e.target.files?.[0];
       if (selectedFile) {
+        setSelectedFile(selectedFile);
         setFile(selectedFile);
         console.log("File uploaded:", selectedFile.name);
       }
     };
-
-    return <input type="file" accept=".pdf" onChange={handleFileChange} />;
+  
+    return (
+      <div className="relative">
+        <button className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded border">
+          Choose PDF File
+        </button>
+        <input 
+          type="file" 
+          accept=".pdf" 
+          onChange={handleFileChange}
+          className="absolute inset-0 opacity-0 w-[120px] cursor-pointer"
+        />
+        <p className="text-gray-700 mt-2">
+          {selectedFile ? `Selected File: ${selectedFile.name}` : ""}
+        </p>
+      </div>
+    );
   };
 
   // Analyze File
@@ -95,10 +113,11 @@ ${cleanedData.items
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">Upload a File</h2>
         <FileUpload setFile={setFile} />
+        <p className="mt-2 text-gray-700">Selected File: {file ? file.name : "no file chosen"}</p>
         <button onClick={analyzeFile} className="bg-blue-500 text-white px-4 py-2 rounded mt-4">
-          Analyze
+            Analyze
         </button>
-      </section>
+    </section>  
       {result && (
         <section className="mb-12">
           <h2 className="text-2xl font-semibold mb-4">OCR Result</h2>
