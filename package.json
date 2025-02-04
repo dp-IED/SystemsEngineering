@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@azure-rest/ai-document-intelligence": "^1.0.0",
+    "@azure/identity": "^4.6.0",
+    "@azure/storage-blob": "^12.26.0",
+    "@tailwindcss/typography": "^0.5.16",
+    "ai-form-recognizer": "^0.0.1-security",
+    "dotenv": "^16.4.7"
+  }
+}
