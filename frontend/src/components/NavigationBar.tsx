@@ -35,6 +35,9 @@ const NavigationBar = () => {
           <Link href="/contact" className="hover:underline">
             Contact
           </Link>
+          <Link href="/OCR" className="hover:underline">
+            OCR
+          </Link>
         </div>
       </div>
     </nav>
