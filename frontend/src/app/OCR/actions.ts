@@ -8,8 +8,8 @@ import DocumentIntelligence, {
 
 export async function extract_invoice_data(base64String: string) {
   const client = DocumentIntelligence(
-    process.env.DOCUMENT_INTELLIGENCE_ENDPOINT || "",
-    { key: process.env.DOCUMENT_INTELLIGENCE_API_KEY || "" }
+    process.env.NEXT_PUBLIC_DOCUMENT_INTELLIGENCE_ENDPOINT || "",
+    { key: process.env.NEXT_PUBLIC_DOCUMENT_INTELLIGENCE_API_KEY || "" }
   );
 
   // Convert Base64 to Binary Buffer
