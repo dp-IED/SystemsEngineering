@@ -1,6 +1,6 @@
 from azure.kusto.data import KustoClient, KustoConnectionStringBuilder, DataFormat
 from azure.kusto.ingest import QueuedIngestClient, IngestionProperties
-from azure.kusto.ingest.descriptors import BlobDescriptor
+from azure.kusto.ingest import BlobDescriptor
 
 # Define ADX cluster and database details
 ADX_CLUSTER = "https://chanelmediacluster.uksouth.kusto.windows.net"
