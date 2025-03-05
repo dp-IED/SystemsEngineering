@@ -11,12 +11,13 @@ kcsb = KustoConnectionStringBuilder.with_az_cli_authentication(ADX_CLUSTER)
 ingest_client = QueuedIngestClient(kcsb)
 
 # Define Blob Storage files and their respective tables
+# Use SAS token for secure access
 files_to_ingest = {
-    "https://systemsteam17storage.blob.core.windows.net/csv-conversion/unbilled.csv": "unbilled",
-    "https://systemsteam17storage.blob.core.windows.net/csv-conversion/budget_tracker_roi.csv": "roi",
-    "https://systemsteam17storage.blob.core.windows.net/csv-conversion/budget_tracker.csv": "budget_tracker",
-    "https://systemsteam17storage.blob.core.windows.net/csv-conversion/po_values.csv": "coupa_report"
-    
+    "https://systemsteam17storage.blob.core.windows.net/csv-conversion/budget_tracker.csv?se=2025-03-07T00%3A00%3A00Z&sp=r&spr=https&sv=2022-11-02&sr=b&sig=YMcuzz2mrij47cWmwYB46DhJvV8IdpJ6CKu3nNbcRic%3D": "budget_tracker",
+    "https://systemsteam17storage.blob.core.windows.net/csv-conversion/unbilled.csv?se=2025-03-07T00%3A00%3A00Z&sp=r&spr=https&sv=2022-11-02&sr=b&sig=uN775OuH%2Fbd9Tn093LB0IB6YXlG%2BQeZ6ftnf%2BVApWS8%3D": "unbilled_report",
+    "https://systemsteam17storage.blob.core.windows.net/csv-conversion/clean_annual_budget_sheet.csv?se=2025-03-07T00%3A00%3A00Z&sp=r&spr=https&sv=2022-11-02&sr=b&sig=84coq2UdSMhKaoIvUJyOKi3M07sW4ELAjNyS1sFKi%2Fs%3D": "annual_budget_sheet",
+    "https://systemsteam17storage.blob.core.windows.net/csv-conversion/coupa_report.csv?se=2025-03-07T00%3A00%3A00Z&sp=r&spr=https&sv=2022-11-02&sr=b&sig=qkX5lzotCEBKWnacEbYcsagT4LeAtaktuBh7HiJfrlk%3D": "coupa_report",
+    "https://systemsteam17storage.blob.core.windows.net/csv-conversion/budget_tracker_roi.csv?se=2025-03-07T00%3A00%3A00Z&sp=r&spr=https&sv=2022-11-02&sr=b&sig=Yi6j2FBG4Tg%2FZeF4CVRKUncqMfWnfPuBvDaaRdRKmY8%3D": "roi"
 }
 
 # Ingest files into the respective tables

@@ -39,7 +39,6 @@ for i in range(1, header_rows.shape[1]):  # Iterate column-wise
     if header_label == "YTD VS PY, YTD 23, 2023, Nov YTD, Actual":
         header_label = "YTD 23, 2023, Nov YTD, Actual"
         
-        
     if 'PERIOD' in header_label or 'FORECAST' in header_label or 'YTD VS PY' in header_label:
         current_prefix = header_label.split(',')[0]  # New prefix starts with these sections
 
