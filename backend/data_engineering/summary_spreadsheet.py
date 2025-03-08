@@ -221,8 +221,15 @@ merged_df = merged_df.rename(columns={"Campaign_x": "Campaign"})
 
 last_budget_value = annual_budget["2024 CURRENT FORECAST Year 2025 Budget"].dropna().iloc[-1]
 
-new_row = pd.DataFrame({"ChanelBudget": [last_budget_value]})
-merged_df = pd.concat([merged_df, new_row], ignore_index=True)
+last_fnb_index = merged_df[merged_df["Division"] == "F&B"].index.max()
+
+# Create the new row
+new_row = pd.DataFrame({
+    "Division": ["F&B"], 
+    "ChanelBudget": [last_budget_value]
+})
+
+merged_df = pd.concat([merged_df.iloc[:last_fnb_index + 1], new_row, merged_df.iloc[last_fnb_index + 1:]], ignore_index=True)
 
 pd.set_option('display.max_columns', None)
 
