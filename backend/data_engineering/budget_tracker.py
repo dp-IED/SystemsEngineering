@@ -3,7 +3,9 @@ import io
 from azure.storage.blob import BlobServiceClient
 
 # azure Blob Storage details
-CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=systemsteam17storage;AccountKey=SFr+0S1aVgKxqNpA0v6gnFdwV1zFZYOagMzRpvN0yH00otwtovRz0c7et9TdYE5BzHWKqPPWl59N+AStXSS9+g==;EndpointSuffix=core.windows.net"
+
+# Azure Blob Storage details
+CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=systemsteam17storage;AccountKey=Wr7IgB+c6ghclYn9rcwRgNpYv16cVKe/0hUWtS1GD/wCcosZcVfFQ0UshCwir6QAykXqfFkcpBVN+AStgDyYYQ==;EndpointSuffix=core.windows.net"
 CONTAINER_NAME = "subcontractor-documents"
 INPUT_FILE = "Budget Tracker.xlsx"  
 OUTPUT_FILE_ROI = "budget_tracker_roi.csv"
@@ -108,8 +110,8 @@ df_non_roi.reset_index(drop=True, inplace=True)
 # print(df_non_roi)
 
 # Convert DataFrame to CSV
-roi_csv = df_roi.to_csv(index=False, encoding="utf-8")
-non_roi_csv = df_non_roi.to_csv(index=False, encoding="utf-8")
+roi_csv = df_roi.to_csv(header=None, index=False, encoding="utf-8")
+non_roi_csv = df_non_roi.to_csv(header=None, index=False, encoding="utf-8")
 
 # Upload CSV back to Blob Storage
 blob_client_output = blob_service_client.get_blob_client(OUTPUT_CONTAINER_NAME_ROI, OUTPUT_FILE_ROI)

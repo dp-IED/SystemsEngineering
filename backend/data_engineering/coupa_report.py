@@ -3,7 +3,7 @@ import io
 from azure.storage.blob import BlobServiceClient
 
 # Azure Blob Storage details
-CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=systemsteam17storage;AccountKey=SFr+0S1aVgKxqNpA0v6gnFdwV1zFZYOagMzRpvN0yH00otwtovRz0c7et9TdYE5BzHWKqPPWl59N+AStXSS9+g==;EndpointSuffix=core.windows.net"
+CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=systemsteam17storage;AccountKey=Wr7IgB+c6ghclYn9rcwRgNpYv16cVKe/0hUWtS1GD/wCcosZcVfFQ0UshCwir6QAykXqfFkcpBVN+AStgDyYYQ==;EndpointSuffix=core.windows.net"
 CONTAINER_NAME = "subcontractor-documents"
 INPUT_FILE = "PO values COUPA report.xlsx"
 OUTPUT_FILE = "po_values.csv"
@@ -20,7 +20,7 @@ downloaded_blob = blob_client.download_blob().readall()
 po_values = pd.read_excel(io.BytesIO(downloaded_blob))
 
 # Convert DataFrame to CSV
-po_values_csv = po_values.to_csv(index=False, encoding="utf-8")
+po_values_csv = po_values.to_csv(header=None, index=False, encoding="utf-8")
 
 # Upload CSV back to Blob Storage
 blob_client_output = blob_service_client.get_blob_client(OUTPUT_CONTAINER_NAME, OUTPUT_FILE)

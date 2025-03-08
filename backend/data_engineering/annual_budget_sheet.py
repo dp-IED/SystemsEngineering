@@ -53,7 +53,7 @@ df = df.dropna(axis=1, how="all")
 
 # Now df has clear, repeated headers for each column
 # Example of saving and uploading the cleaned data
-clean_csv = df.to_csv(index=False)
+clean_csv = df.to_csv(header=None, index=False)
 blob_client_output = blob_service_client.get_blob_client(container="csv-conversion", blob="clean_annual_budget_sheet.csv")
 blob_client_output.upload_blob(clean_csv, overwrite=True)
 
