@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
+import * as XLSX from "xlsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
@@ -12,17 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, TrendingDown } from "lucide-react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  XAxis,
-  Pie,
-  PieChart,
-  Cell,
-  ResponsiveContainer,
-} from "recharts";
-
+import { Bar, BarChart, CartesianGrid, XAxis, Pie, PieChart, Cell, ResponsiveContainer } from "recharts";
 import {
   Card,
   CardContent,
@@ -31,121 +22,77 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 export interface Expense {
   id: number;
   name: string;
   division: string;
-  category: string;
+  campaign: string;
   date: string;
   amount: string;
 }
 
-interface EditedExpense extends Expense {
-  amount: string;
-}
+const API_URL =
+  "https://systemsteam17storage.blob.core.windows.net/summary/FormattedAnnualBudget.xlsx?se=2025-04-10T23%3A59%3A59Z&sp=r&sv=2022-11-02&sr=b&sig=1DvdyO%2BRgtocwWEPBo1GmfRZG4CimWg8QYHXYIEQ6a0%3D"; // Direct Blob URL
 
-function ExpenseDashboard() {
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const [selectedExpense, setSelectedExpense] = React.useState<Expense | null>(
-    null
-  );
+const ExpenseDashboard: React.FC = () => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [excelData, setExcelData] = useState<{ 
+    fnb: string[][]; 
+    fshew: string[][]; 
+    wfj: string[][]; 
+  }>({
+    fnb: [],
+    fshew: [],
+    wfj: [],
+  });
+  
 
-  const [unreconciled, setUnreconciled] = React.useState<Expense[]>([
-    {
-      id: 1,
-      name: "Expense 1",
-      division: "Division 1",
-      category: "Marketing",
-      date: "12/02/24",
-      amount: "£14,500",
-    },
-    {
-      id: 2,
-      name: "Expense 2",
-      division: "Division 3",
-      category: "Marketing",
-      date: "20/02/24",
-      amount: "£20,130",
-    },
-    {
-      id: 3,
-      name: "Expense 3",
-      division: "Division 2",
-      category: "Marketing",
-      date: "14/02/24",
-      amount: "£8,650",
-    },
-  ]);
+  const recentTransactions: Expense[] = [
+    { id: 1, name: "Expense A", division: "F&B", campaign: "Bleu", date: "01/02/24", amount: "£10,500" },
+    { id: 2, name: "Expense B", division: "FSH&EW", campaign: "Les Beiges", date: "05/02/24", amount: "£25,300" },
+    { id: 3, name: "Expense C", division: "W&FJ", campaign: "Rouge Allure", date: "10/02/24", amount: "£5,200" },
+  ];
 
-  const [reconciled, setReconciled] = React.useState<Expense[]>([]);
-
-  const [editedExpense, setEditedExpense] = React.useState<Expense | null>(
-    null
-  );
-  const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
-
-  // Update the handleResolveConfirm function
-  const handleResolveConfirm = (editedExpense: EditedExpense) => {
-    if (!editedExpense && !selectedFile) return;
-
-    const updatedExpenses = unreconciled.filter(
-      (expense) => expense.id !== editedExpense.id
-    );
-
-    setReconciled([...reconciled, editedExpense]);
-    setUnreconciled(updatedExpenses);
-    setIsDialogOpen(false);
-    setSelectedFile(null);
-    setEditedExpense(null);
-    setSelectedExpense(null);
-  };
-
-  const handleResolveClick = (expense: Expense) => {
-    setSelectedExpense(expense);
-    setEditedExpense({
-      ...expense,
-      amount: expense.amount.replace("£", ""),
-    });
-    setIsDialogOpen(true);
-  };
-
-  // Update the amount input to handle the £ symbol better
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!editedExpense) return;
-
-    const value = e.target.value;
-    const numericValue = value.replace(/[^0-9.]/g, "");
-
-    setEditedExpense({
-      ...editedExpense,
-      amount: `£${numericValue}`,
-    });
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-    }
-  };
+  // Fetch Excel File from Backend and Parse it
+  useEffect(() => {
+    const fetchExcelFile = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch(API_URL, { method: "GET" });
+  
+        if (!response.ok) throw new Error("Failed to fetch file.");
+  
+        const blob = await response.blob();
+        const reader = new FileReader();
+        reader.readAsBinaryString(blob);
+        reader.onload = (e) => {
+          const binaryStr = e.target?.result as string;
+          const workbook = XLSX.read(binaryStr, { type: "binary" });
+  
+          // Extract sheets for each division
+          const fnbSheet = workbook.Sheets["F&B"];
+          const fshewSheet = workbook.Sheets["FSH&EW"];
+          const wfjSheet = workbook.Sheets["W&FJ"];
+  
+          // Convert each sheet to JSON format
+          setExcelData({
+            fnb: XLSX.utils.sheet_to_json(fnbSheet, { header: 1 }) as string[][],
+            fshew: XLSX.utils.sheet_to_json(fshewSheet, { header: 1 }) as string[][],
+            wfj: XLSX.utils.sheet_to_json(wfjSheet, { header: 1 }) as string[][],
+          });
+        };
+      } catch (error) {
+        console.error("Error fetching Excel file:", error);
+      }
+      setIsLoading(false);
+    };
+  
+    fetchExcelFile();
+  }, []);
+  
+  
 
   const chartData = [
     { month: "January", div1: 75, div2: 85, div3: 65 },
@@ -157,328 +104,240 @@ function ExpenseDashboard() {
   ];
 
   const chartConfig = {
-    div1: {
-      label: "Division 1",
-      color: "hsl(var(--chart-1))",
-    },
-    div2: {
-      label: "Division 2",
-      color: "hsl(var(--chart-2))",
-    },
-    div3: {
-      label: "Division 3",
-      color: "hsl(var(--chart-3))",
-    },
+    div1: { label: "F&B", color: "hsl(var(--chart-1))" },
+    div2: { label: "FSH&EW", color: "hsl(var(--chart-2))" },
+    div3: { label: "W&FJ", color: "hsl(var(--chart-3))" },
   } satisfies ChartConfig;
-
-  const distributionData = [
-    { name: "Division 1", value: 27, fill: "hsl(var(--chart-1))" },
-    { name: "Division 2", value: 23, fill: "hsl(var(--chart-2))" },
-    { name: "Division 3", value: 18, fill: "hsl(var(--chart-3))" },
-    { name: "Unreconciled", value: 32, fill: "hsl(var(--destructive))" },
-  ];
 
   return (
     <div className="p-6 max-w-[1200px] mx-auto">
       <Tabs defaultValue="overview" className="mb-8">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="division1">Division 1</TabsTrigger>
-          <TabsTrigger value="division2">Division 2</TabsTrigger>
-          <TabsTrigger value="division3">Division 3</TabsTrigger>
+          <TabsTrigger value="division1">F&B</TabsTrigger>
+          <TabsTrigger value="division2">FSH&EW</TabsTrigger>
+          <TabsTrigger value="division3">W&FJ</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-8">
+          {/* 📌 Recent Transactions */}
           <div className="mt-8">
-            <h2 className="text-2xl font-semibold mb-4">
-              Unreconciled expenses:
-            </h2>
+            <h2 className="text-2xl font-semibold mb-4">Recent Transactions</h2>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="cursor-pointer">
-                    Name <ChevronDown className="inline h-4 w-4" />
-                  </TableHead>
-                  <TableHead className="cursor-pointer">
-                    Division <ChevronDown className="inline h-4 w-4" />
-                  </TableHead>
-                  <TableHead className="cursor-pointer">
-                    Category <ChevronDown className="inline h-4 w-4" />
-                  </TableHead>
-                  <TableHead className="cursor-pointer">
-                    Date <ChevronDown className="inline h-4 w-4" />
-                  </TableHead>
-                  <TableHead className="cursor-pointer">
-                    Amount <ChevronDown className="inline h-4 w-4" />
-                  </TableHead>
-                  <TableHead></TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Division</TableHead>
+                  <TableHead>Campaign</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Amount</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {unreconciled.map((expense) => (
+                {recentTransactions.map((expense) => (
                   <TableRow key={expense.id}>
                     <TableCell>{expense.name}</TableCell>
                     <TableCell>{expense.division}</TableCell>
-                    <TableCell>{expense.category}</TableCell>
+                    <TableCell>{expense.campaign}</TableCell>
                     <TableCell>{expense.date}</TableCell>
                     <TableCell>{expense.amount}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outline"
-                        onClick={() => handleResolveClick(expense)}
-                        className="glow-effect hover:bg-violet-600 transition-all duration-300"
-                      >
-                        Resolve Expense
-                      </Button>
-                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
           </div>
 
-          <div className="mt-12">
-            <h2 className="text-2xl font-semibold mb-8">Overall Spending</h2>
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="flex flex-col gap-8">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Division Performance</CardTitle>
-                    <CardDescription>January - June 2024</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ChartContainer config={chartConfig}>
-                      <BarChart accessibilityLayer data={chartData}>
-                        <CartesianGrid vertical={false} />
-                        <XAxis
-                          dataKey="month"
-                          tickLine={false}
-                          tickMargin={10}
-                          axisLine={false}
-                          tickFormatter={(value) => value.slice(0, 3)}
-                        />
-                        <ChartTooltip
-                          cursor={false}
-                          content={<ChartTooltipContent indicator="dashed" />}
-                        />
-                        <Bar
-                          dataKey="div1"
-                          fill="var(--color-div1)"
-                          radius={4}
-                        />
-                        <Bar
-                          dataKey="div2"
-                          fill="var(--color-div2)"
-                          radius={4}
-                        />
-                        <Bar
-                          dataKey="div3"
-                          fill="var(--color-div3)"
-                          radius={4}
-                        />
-                      </BarChart>
-                    </ChartContainer>
-                  </CardContent>
-                  <CardFooter className="flex-col items-start gap-2 text-sm">
-                    <div className="flex gap-2 font-medium leading-none">
-                      Overall spending down 3.2% this month{" "}
-                      <TrendingDown className="h-4 w-4" />
-                    </div>
-                    <div className="leading-none text-muted-foreground">
-                      Showing division performance for the last 6 months
-                    </div>
-                  </CardFooter>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Division Distribution</CardTitle>
-                    <CardDescription>Current Month</CardDescription>
-                  </CardHeader>
-                  <CardContent className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={distributionData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={80}
-                          paddingAngle={2}
-                          dataKey="value"
-                          label={({ name, value }) => `${name} (${value}%)`}
-                        >
-                          {distributionData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                          ))}
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                  <CardFooter className="flex justify-between text-sm">
-                    <div className="grid grid-cols-2 gap-4">
-                      {distributionData.map((item, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <div
-                            className="w-3 h-3 rounded"
-                            style={{ backgroundColor: item.fill }}
-                          />
-                          <span className="text-muted-foreground">
-                            {item.name}: {item.value}%
-                          </span>
-                        </div>
+        
+          {/* 📌 Excel File Preview */}
+          <div className="mt-8">
+            <h2 className="text-2xl font-semibold mb-4">Budget Visualization</h2>
+            {isLoading ? (
+              <p>Loading Excel Data...</p>
+            ) : excelData.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {excelData[0].map((header, index) => (
+                      <TableHead key={index}>{header}</TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {excelData.slice(1).map((row, rowIndex) => (
+                    <TableRow key={rowIndex}>
+                      {row.map((cell, cellIndex) => (
+                        <TableCell key={cellIndex}>{cell}</TableCell>
                       ))}
-                    </div>
-                  </CardFooter>
-                </Card>
-              </div>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p>No data available.</p>
+            )}
+          </div>
 
-              <div className="flex flex-col gap-8">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Total Spending</CardTitle>
-                    <CardDescription>+20.1% from last month</CardDescription>
-                  </CardHeader>
-                  <CardContent className="text-xl font-semibold">
-                    £
-                    {unreconciled.reduce((acc, expense) => {
-                      return (
-                        acc +
-                        parseFloat(
-                          expense.amount.replace("£", "").replace(",", "")
-                        )
-                      );
-                    }, 0) +
-                      reconciled.reduce((acc, expense) => {
-                        return (
-                          acc +
-                          parseFloat(
-                            expense.amount.replace("£", "").replace(",", "")
-                          )
-                        );
-                      }, 0)}
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Resolved</CardTitle>
-                    <CardDescription>Highest spend: Marketing</CardDescription>
-                  </CardHeader>
-                  <CardContent className="text-xl font-semibold">
-                    £
-                    {reconciled.reduce((acc, expense) => {
-                      return (
-                        acc +
-                        parseFloat(
-                          expense.amount.replace("£", "").replace(",", "")
-                        )
-                      );
-                    }, 0)}
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Not Resolved</CardTitle>
-                    <CardDescription>
-                      {reconciled.length} expenses resolved this month
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="text-xl font-semibold">
-                    £
-                    {unreconciled.reduce((acc, expense) => {
-                      return (
-                        acc +
-                        parseFloat(
-                          expense.amount.replace("£", "").replace(",", "")
-                        )
-                      );
-                    }, 0)}
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
+          {/* 📌 Download Button */}
+          <div className="flex justify-end">
+            <Button asChild>
+              <a href={API_URL} download="Financial_Report.xlsx">
+                ⬇ Download Report
+              </a>
+            </Button>
           </div>
         </TabsContent>
+        {/* 🔹 F&B DIVISION */}
+<TabsContent value="division1">
+  <h2 className="text-2xl font-semibold mb-4">F&B Division</h2>
 
-        <TabsContent value="division1">
-          <div className="h-96 flex items-center justify-center text-gray-500">
-            Division 1 content
-          </div>
-        </TabsContent>
+  {isLoading ? (
+    <p>Loading Excel Data...</p>
+  ) : excelData.fnb.length > 0 ? (
+    <div className="overflow-x-auto border border-gray-300 shadow-md rounded-lg">
 
+      {/* 📌 Merged Summary & Monthly Breakdown Table */}
+<h3 className="text-lg font-semibold mt-4 mb-2">Budget Overview</h3>
+<Table className="w-full border-collapse">
+  <TableHeader className="bg-black text-white">
+    {/* First Row: Fixed Info Headers & Month Headers */}
+    <TableRow>
+      <TableHead className="p-3 font-bold text-center" rowSpan={2}>PO Number</TableHead>
+      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Campaign</TableHead>
+      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Channel</TableHead>
+      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Product Code</TableHead>
+      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Net Billable</TableHead>
+      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Agency Commission</TableHead>
+      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Levy (ASBOF)</TableHead>
+      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Total Invoice Val</TableHead>
+      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Planned Spend</TableHead>
+      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Reserved Budget</TableHead>
+      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Total Budget</TableHead>
+      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Channel Budget</TableHead>
+      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Market</TableHead>
+      {[
+        "January", "February", "March", "April", "May", "June", 
+        "July", "August", "September", "October", "November", "December"
+      ].map((month, index) => (
+        <TableHead key={index} colSpan={4} className="p-3 font-bold text-center border">
+          {month}
+        </TableHead>
+      ))}
+    </TableRow>
+
+    {/* Second Row: 4 Subheaders Per Month */}
+    <TableRow>
+      {Array(12).fill(["Net Billable", "Agency Commission", "Levy (ASBOF)", "Total Invoice Val"])
+        .flat()
+        .map((subHeader, index) => (
+          <TableHead key={index} className="p-3 font-bold border">
+            {subHeader}
+          </TableHead>
+        ))}
+    </TableRow>
+  </TableHeader>
+
+  {/* Table Body with Data from Summary Spreadsheet */}
+  <TableBody>
+    {excelData.fnb.slice(1).map((row, rowIndex) => (
+      <TableRow key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-50" : "bg-white"}>
+        {/* Fixed Info Columns */}
+        {row.slice(0, 13).map((cell, cellIndex) => (
+          <TableCell key={cellIndex} className="border border-gray-200 p-3 text-center">
+            {cell}
+          </TableCell>
+        ))}
+
+        {/* Monthly Data: Net Billable, Agency Commission, Levy, Total Invoice */}
+        {row.slice(13).map((cell, cellIndex) => (
+          <TableCell key={cellIndex} className="border border-gray-200 p-3 text-center">
+            {cell}
+          </TableCell>
+        ))}
+      </TableRow>
+    ))}
+  </TableBody>
+</Table>
+
+
+    </div>
+  ) : (
+    <p>No data available.</p>
+  )}
+</TabsContent>
+
+
+        {/* 🔹 FSH&EW DIVISION */}
         <TabsContent value="division2">
-          <div className="h-96 flex items-center justify-center text-gray-500">
-            Division 2 content
-          </div>
+          <h2 className="text-2xl font-semibold mb-4">FSH&EW Division</h2>
+          {isLoading ? (
+            <p>Loading Excel Data...</p>
+          ) : excelData.fshew.length > 0 ? (
+            <div className="overflow-x-auto border border-gray-300 shadow-md rounded-lg">
+              <Table className="w-full border-collapse">
+                <TableHeader className="bg-black text-white">
+                  <TableRow>
+                    {excelData.fshew[0].map((header, index) => (
+                      <TableHead key={index} className="p-3 font-bold">
+                        {header}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {excelData.fshew.slice(1).map((row, rowIndex) => (
+                    <TableRow key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-50" : "bg-white"}>
+                      {row.map((cell, cellIndex) => (
+                        <TableCell key={cellIndex} className="border border-gray-200 p-3 text-center">
+                          {cell}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <p>No data available.</p>
+          )}
         </TabsContent>
 
+        {/* 🔹 W&FJ DIVISION */}
         <TabsContent value="division3">
-          <div className="h-96 flex items-center justify-center text-gray-500">
-            Division 3 content
-          </div>
+          <h2 className="text-2xl font-semibold mb-4">W&FJ Division</h2>
+          {isLoading ? (
+            <p>Loading Excel Data...</p>
+          ) : excelData.wfj.length > 0 ? (
+            <div className="overflow-x-auto border border-gray-300 shadow-md rounded-lg">
+              <Table className="w-full border-collapse">
+                <TableHeader className="bg-black text-white">
+                  <TableRow>
+                    {excelData.wfj[0].map((header, index) => (
+                      <TableHead key={index} className="p-3 font-bold">
+                        {header}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {excelData.wfj.slice(1).map((row, rowIndex) => (
+                    <TableRow key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-50" : "bg-white"}>
+                      {row.map((cell, cellIndex) => (
+                        <TableCell key={cellIndex} className="border border-gray-200 p-3 text-center">
+                          {cell}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <p>No data available.</p>
+          )}
         </TabsContent>
       </Tabs>
-      {selectedExpense && editedExpense && (
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Resolve Expense</DialogTitle>
-              <DialogDescription>
-                Match this expense with an invoice and update details if needed.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="amount" className="text-right">
-                  Amount
-                </Label>
-                <div className="col-span-3 relative">
-                  <span className="absolute left-3 top-2">£</span>
-                  <Input
-                    id="amount"
-                    type="text"
-                    value={editedExpense.amount?.replace("£", "") || ""}
-                    onChange={handleAmountChange}
-                    className="pl-6"
-                    placeholder="0.00"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="invoice" className="text-right">
-                  Invoice
-                </Label>
-                <div className="col-span-3">
-                  <Input
-                    id="invoice"
-                    type="file"
-                    onChange={handleFileChange}
-                    className="col-span-3"
-                    accept=".pdf,.jpg,.png,.xlsx"
-                  />
-                  {selectedFile && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Selected: {selectedFile.name}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={() => handleResolveConfirm(editedExpense)}>
-                Confirm Match
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
     </div>
   );
-}
+};
 
 export default ExpenseDashboard;
