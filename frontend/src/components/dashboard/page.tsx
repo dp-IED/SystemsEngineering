@@ -75,7 +75,7 @@ function DashboardContent() {
         {/* ✅ 3️⃣ Pie Chart: Campaign Breakdown */}
         {charts?.campaign_breakdown?.length ? (
           <div className="border p-4 rounded-lg shadow-md">
-            <h2 className="text-lg font-semibold">Campaign Breakdown</h2>
+            <h2 className="text-lg font-semibold">Breakdown by campaign</h2>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie data={charts.campaign_breakdown} dataKey="TotalSpend" nameKey="Campaign">
@@ -92,7 +92,7 @@ function DashboardContent() {
         {/* ✅ 4️⃣ Pie Chart: Market Breakdown */}
         {charts?.market_breakdown?.length ? (
           <div className="border p-4 rounded-lg shadow-md">
-            <h2 className="text-lg font-semibold">Market Breakdown</h2>
+            <h2 className="text-lg font-semibold">Breakdown by market</h2>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie data={charts.market_breakdown} dataKey="TotalSpend" nameKey="Market">
@@ -109,7 +109,7 @@ function DashboardContent() {
         {/* ✅ 5️⃣ Pie Chart: Division Breakdown */}
         {charts?.division_breakdown?.length ? (
           <div className="border p-4 rounded-lg shadow-md">
-            <h2 className="text-lg font-semibold">Division Breakdown</h2>
+            <h2 className="text-lg font-semibold">Breakdown by division</h2>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie data={charts.division_breakdown} dataKey="TotalSpend" nameKey="Division">
@@ -126,7 +126,7 @@ function DashboardContent() {
         {/* ✅ 6️⃣ Pie Chart: Channel Breakdown */}
         {charts?.channel_breakdown?.length ? (
           <div className="border p-4 rounded-lg shadow-md">
-            <h2 className="text-lg font-semibold">Channel Breakdown</h2>
+            <h2 className="text-lg font-semibold">Breakdown by channel</h2>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie data={charts.channel_breakdown} dataKey="TotalSpend" nameKey="Channel">
@@ -143,7 +143,7 @@ function DashboardContent() {
         {/* ✅ 7️⃣ Pie Chart: Monthly Breakdown */}
         {charts?.monthly_breakdown?.length ? (
           <div className="border p-4 rounded-lg shadow-md">
-            <h2 className="text-lg font-semibold">Monthly Breakdown</h2>
+            <h2 className="text-lg font-semibold">Breakdown by month</h2>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie data={charts.monthly_breakdown} dataKey="TotalSpend" nameKey="Month">
