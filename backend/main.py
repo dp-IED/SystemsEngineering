@@ -27,11 +27,13 @@ QUERIES = {
         summary
         | summarize TotalPlannedSpend = sum(PlannedSpend), TotalActualSpend = sum(Total_Invoice_Val) by Month
         | order by Month asc
+        | where Month != "Total"
     """,
     "overall_monthly_spend": """
         summary
         | summarize TotalSpend = sum(Total_Invoice_Val) by Month
         | order by Month asc
+        | where Month != "Total"
     """,
     "campaign_breakdown": """
         summary
