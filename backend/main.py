@@ -52,11 +52,13 @@ QUERIES = {
         summary
         | summarize TotalSpend = sum(Total_Invoice_Val) by Channel
         | order by TotalSpend desc
+        | where Channel != "Total"
     """,
     "monthly_breakdown": """
         summary
         | summarize TotalSpend = sum(Total_Invoice_Val) by Month
         | order by TotalSpend desc
+        | where Month != "Total"
     """
 }
 
@@ -80,7 +82,7 @@ def get_charts():
             print(f"Columns: {[col.column_name for col in table.columns]}")  # ✅ Debugging output
             print(f"Rows: {table.raw_rows[:5]}")  # ✅ Print first 5 rows
 
-            rows = [dict(zip([col.column_name for col in table.columns], row)) for row in table.raw_rows]
+            rows = [dict(zip([col.column_name for col in table.columns], row)) for row in table.rows]
             response_data[chart_name] = rows
         except Exception as e:
             print(f"Error in {chart_name}: {str(e)}")  # ✅ Debugging output
