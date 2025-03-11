@@ -2,13 +2,10 @@ import pandas as pd
 import io
 from azure.storage.blob import BlobServiceClient
 
-# azure Blob Storage details
-
 # Azure Blob Storage details
 CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=systemsteam17storage;AccountKey=Wr7IgB+c6ghclYn9rcwRgNpYv16cVKe/0hUWtS1GD/wCcosZcVfFQ0UshCwir6QAykXqfFkcpBVN+AStgDyYYQ==;EndpointSuffix=core.windows.net"
 CONTAINER_NAME = "subcontractor-documents"
 INPUT_FILE = "Budget Tracker.xlsx"  
-OUTPUT_FILE_ROI = "budget_tracker_roi.csv"
 OUTPUT_FILE = "budget_tracker.csv"
 OUTPUT_CONTAINER_NAME = "csv-conversion"
 OUTPUT_CONTAINER_NAME_ROI = "csv-conversion"
@@ -63,7 +60,7 @@ def assign_division(campaign):
 df["Division"] = df["Campaign (UK)"].apply(assign_division)
 
 # Create a new column 'Category' and initialize with None
-df['Category'] = None
+df['Market'] = None
 
 # Iterate over rows to mark rows based on "Campaign (ROI)" and "Campaign (UK)"
 roi_flag = False
@@ -75,48 +72,33 @@ for i, row in df.iterrows():
         roi_flag = False  # Stop marking "ROI"
     
     # Assign "ROI" or None based on the flag
-    df.at[i, 'Category'] = 'ROI' if roi_flag else None
+    df.at[i, 'Market'] = 'IRE' if roi_flag else 'UK'
 
 # Create a new column to check if the row is a header
 df['Is_Header'] = df.iloc[:, 1].apply(lambda x: "CHANEL Budget (Last Update: v14)" if x == "CHANEL Budget (Last Update: v14)" else None)
 
-# Separate the DataFrame into ROI and non-ROI tables
-df_roi = df[df['Category'] == 'ROI']
-df_non_roi = df[df['Category'] != 'ROI']
-
 # Remove rows where Division = "Other"
-df_roi = df_roi[df_roi['Division'] != 'Other']
-df_non_roi = df_non_roi[df_non_roi['Division'] != 'Other']
+df = df[df['Division'] != 'Other']
 
 # Remove remaining header rows
-df_non_roi = df_non_roi[df_non_roi['Is_Header'].isna()]
+df = df[df['Is_Header'].isna()]
 
-# Remove Category and Is_Header
-df_roi = df_roi.drop(columns=['Category', 'Is_Header'])
-df_non_roi = df_non_roi.drop(columns=['Category', 'Is_Header'])
+# Remove Is_Header
+df = df.drop(columns=['Is_Header', 'Division'])
 
-# Remove duplicate rows
-df_non_roi = df_non_roi.drop_duplicates()
+# Reset index
+df.reset_index(drop=True, inplace=True)
 
-# Reset indexes for both tables
-df_roi.reset_index(drop=True, inplace=True)
-df_non_roi.reset_index(drop=True, inplace=True)
+# Rename campaign column
+df.rename(columns={df.columns[0]: 'Campaign'}, inplace=True)
 
-# Print both tables (or save them if needed)
-# print("ROI DataFrame:")
-# print(df_roi)
-
-# print("\nNon-ROI DataFrame:")
-# print(df_non_roi)
+pd.set_option('display.max_columns', 30)
 
 # Convert DataFrame to CSV
-roi_csv = df_roi.to_csv(header=None, index=False, encoding="utf-8")
-non_roi_csv = df_non_roi.to_csv(header=None, index=False, encoding="utf-8")
+budget_csv = df.to_csv(header=None, index=False, encoding="utf-8")
 
 # Upload CSV back to Blob Storage
-blob_client_output = blob_service_client.get_blob_client(OUTPUT_CONTAINER_NAME_ROI, OUTPUT_FILE_ROI)
-blob_client_output.upload_blob(roi_csv, overwrite=True)
 blob_client_output = blob_service_client.get_blob_client(OUTPUT_CONTAINER_NAME, OUTPUT_FILE)
-blob_client_output.upload_blob(non_roi_csv, overwrite=True)
+blob_client_output.upload_blob(budget_csv, overwrite=True)
 
 print("Excel file converted to CSV, cleaned and uploaded successfully!")

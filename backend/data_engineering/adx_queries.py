@@ -13,11 +13,10 @@ ingest_client = QueuedIngestClient(kcsb)
 # Define Blob Storage files and their respective tables
 # Use SAS token for secure access
 files_to_ingest = {
-    "https://systemsteam17storage.blob.core.windows.net/csv-conversion/budget_tracker.csv?se=2025-03-07T00%3A00%3A00Z&sp=r&spr=https&sv=2022-11-02&sr=b&sig=YMcuzz2mrij47cWmwYB46DhJvV8IdpJ6CKu3nNbcRic%3D": "budget_tracker",
-    "https://systemsteam17storage.blob.core.windows.net/csv-conversion/unbilled.csv?se=2025-03-07T00%3A00%3A00Z&sp=r&spr=https&sv=2022-11-02&sr=b&sig=uN775OuH%2Fbd9Tn093LB0IB6YXlG%2BQeZ6ftnf%2BVApWS8%3D": "unbilled_report",
+    "https://systemsteam17storage.blob.core.windows.net/csv-conversion/budget_tracker.csv?sp=r&st=2025-03-11T10:00:23Z&se=2025-04-01T17:00:23Z&spr=https&sv=2022-11-02&sr=b&sig=tdbuRt9EShYu5gJTZEIchDmPfvEy0d%2FTU2Azy9Yra7s%3D": "budgettracker",
+    "https://systemsteam17storage.blob.core.windows.net/csv-conversion/billed.csv?sp=r&st=2025-03-11T10:05:29Z&se=2025-04-01T17:05:29Z&spr=https&sv=2022-11-02&sr=b&sig=RI0Ff31rP9hlyPolkLAODLux5yr%2FoeqWBiLRlncTopQ%3D": "billed_report",
     "https://systemsteam17storage.blob.core.windows.net/csv-conversion/clean_annual_budget_sheet.csv?se=2025-03-07T00%3A00%3A00Z&sp=r&spr=https&sv=2022-11-02&sr=b&sig=84coq2UdSMhKaoIvUJyOKi3M07sW4ELAjNyS1sFKi%2Fs%3D": "annual_budget_sheet",
     "https://systemsteam17storage.blob.core.windows.net/csv-conversion/po_values.csv?se=2025-03-07T00%3A00%3A00Z&sp=r&spr=https&sv=2022-11-02&sr=b&sig=qkX5lzotCEBKWnacEbYcsagT4LeAtaktuBh7HiJfrlk%3D": "coupa_report",
-    "https://systemsteam17storage.blob.core.windows.net/csv-conversion/budget_tracker_roi.csv?se=2025-03-07T00%3A00%3A00Z&sp=r&spr=https&sv=2022-11-02&sr=b&sig=Yi6j2FBG4Tg%2FZeF4CVRKUncqMfWnfPuBvDaaRdRKmY8%3D": "roi"
 }
 
 # Ingest files into the respective tables
@@ -29,7 +28,8 @@ for file_url, table_name in files_to_ingest.items():
     ingestion_properties = IngestionProperties(
         database=DATABASE,
         table=table_name,
-        data_format=DataFormat.CSV
+        data_format=DataFormat.CSV,
+        flush_immediately=True
     )
     
     ingest_client.ingest_from_blob(blob_descriptor, ingestion_properties)

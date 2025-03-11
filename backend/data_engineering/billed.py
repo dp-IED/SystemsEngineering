@@ -5,8 +5,8 @@ from azure.storage.blob import BlobServiceClient
 # Azure Blob Storage details
 CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=systemsteam17storage;AccountKey=Wr7IgB+c6ghclYn9rcwRgNpYv16cVKe/0hUWtS1GD/wCcosZcVfFQ0UshCwir6QAykXqfFkcpBVN+AStgDyYYQ==;EndpointSuffix=core.windows.net"
 CONTAINER_NAME = "subcontractor-documents"
-INPUT_FILE = "Chanel UK Unbilled.xlsx"  
-OUTPUT_FILE = "unbilled.csv"
+INPUT_FILE = "Chanel UK Billed.xlsx"  
+OUTPUT_FILE = "billed.csv"
 OUTPUT_CONTAINER_NAME = "csv-conversion"
 
 # Connect to Blob Storage
@@ -41,13 +41,13 @@ fashion = fashion.drop(fashion.index[-1])
 paid_search = paid_search.drop(paid_search.index[-1])
 
 # Merge tables from each sheet into one dataframe
-unbilled = pd.concat([fb, wfj, fashion, paid_search], ignore_index=True)
+billed = pd.concat([fb, wfj, fashion, paid_search], ignore_index=True)
 
 # Convert DataFrame to CSV
-unbilled_csv = unbilled.to_csv(header=None, index=False, encoding="utf-8")
+billed_csv = billed.to_csv(header=None, index=False, encoding="utf-8")
 
 # Upload CSV back to Blob Storage
 blob_client_output = blob_service_client.get_blob_client(OUTPUT_CONTAINER_NAME, OUTPUT_FILE)
-blob_client_output.upload_blob(unbilled_csv, overwrite=True)
+blob_client_output.upload_blob(billed_csv, overwrite=True)
 
-# print("Excel file converted to CSV, cleaned and uploaded successfully!")
+print("Excel file converted to CSV, cleaned and uploaded successfully!")

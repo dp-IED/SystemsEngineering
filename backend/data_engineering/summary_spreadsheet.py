@@ -9,8 +9,11 @@ import pandas as pd
 from openpyxl import load_workbook, Workbook
 from openpyxl.styles import Alignment, Font
 from openpyxl.utils import get_column_letter
-from azure.kusto.data import KustoClient, KustoConnectionStringBuilder
+from azure.kusto.data import KustoClient, KustoConnectionStringBuilder, DataFormat
 from azure.kusto.data.helpers import dataframe_from_result_table
+from azure.kusto.ingest import QueuedIngestClient, IngestionProperties
+from azure.kusto.ingest.ingestion_properties import ReportLevel
+import tempfile
 import time
 import os
 from azure.kusto.data import KustoClient, KustoConnectionStringBuilder
@@ -102,18 +105,20 @@ def append_monthly_tables_to_excel(filename, start_col):
     
     # Adjust column widths
     set_column_width(sheet, start_col, headers, months)
-    
-    
 
     # Save the workbook
     book.save(filename)
     book.close()
+    print("Monthly tables have been added and formatted successfully.")
 
-# Define your database and table
+
+# Define ADX information
 CLUSTER = "https://chanelmediacluster.uksouth.kusto.windows.net"
 DATABASE = "financial-database-1"
-QUERY_1 = """
-unbilled_report
+BILLED_QUERY = """
+//further clean billed report
+
+billed_report
 // add column of months
 | extend Month = datetime_part("month", todatetime(BuyMonth))
 | extend Month = case(
@@ -158,8 +163,8 @@ unbilled_report
     ProductName)
 // create market column based on LocalCurrencyCode
 | extend Market = case(
-    CampaignName has "UK", "UK",
-    CampaignName has "IRE", "IRE",
+    ClientCode == "C50" or ClientCode == "C51" or ClientCode == "C52" or ClientCode == "C60", "UK",
+    ClientCode == "C58" or ClientCode == "C65", "IRE",
     "")
 // clean up campaign name - remove _ and CHANEL, remove channel name
 | extend Campaign = replace_regex(CampaignName, @"_", " ")
@@ -191,7 +196,7 @@ unbilled_report
     Campaign contains "COCOMELLE", "Coco Melle",
     ProductName == "MDA", "MDA",
     Campaign)
-| extend Division = case(
+|extend Division = case(
     Channel == "Retainer Fee" and Campaign contains "F&B", "F&B",
     Channel == "Retainer Fee" and Campaign contains "FASHION", "FSH&EW",
     Channel == "Retainer Fee" and Campaign contains "EYEWEAR", "FSH&EW",
@@ -201,27 +206,31 @@ unbilled_report
     Channel == "Retainer Fee", Division,  // Keep the original division if no match
     Division  // Default to the original division if Channel is not "Retainer Fee"
 )
-| summarize 
-    NetBillable = sum(Payable), 
-    AgencyCommission = sum(AgencyCommission), 
-    LevyASBOF = sum(LevyBillable), 
-    ProductCode = take_any(ProductCode),
-    NormalisedProductName = take_any(NormalisedProductName),
-    PO_Number = take_any(PO),
-    Market = take_any(Market),
-    Total_Invoice_Val = sum(UnbilledClientCost)
-by Campaign, Division, Channel, Month
+| project 
+    PO_Number = PO,
+    Campaign,
+    Channel,
+    ProductCode,
+    NormalisedProductName,
+    NetBillable = Payable,
+    AgencyCommission,
+    LevyASBOF = LevyBillable,
+    Total_Invoice_Val = UnbilledClientCost,
+    Market,
+    Division,
+    Month,
+    InvoiceNo
 | sort by Division asc, Campaign asc
 """
-QUERY_2 = """
-budget_tracker
+BUDGET_QUERY = """
+budgettracker
 | extend GrandTotalReserve = ['GRAND TOTAL inc reserve'],
 PlannedSpendData = ['Planned Spend latest plan'],
 Reserve = ['Reserve'] // Include the reserve amount
 | extend TotalAvailableBudget = GrandTotalReserve // Budget already includes reserve
 | extend Campaign = tolower(trim(" ", Campaign))
 | join kind=leftouter (
-unbilled_report
+billed_report
 | extend Campaign = replace_regex(CampaignName, @"_", " ")
 | extend Campaign = replace_regex(Campaign, @"\b(CHANEL)\b", "")
 | extend Campaign = replace_regex(Campaign, @"-", " ")
@@ -251,80 +260,118 @@ TotalUnbilled = sum(UnbilledCurrency),
 TotalBudget = sum(TotalAvailableBudget),
 PlannedSpend = sum(PlannedSpendData),
 ReservedBudget = sum(Reserve)
-by Campaign
-| project Campaign, PlannedSpend, ReservedBudget, TotalBudget
+by Campaign, Market
+| project Campaign, PlannedSpend, ReservedBudget, TotalBudget, Market
 """
 
-QUERY_3 = "annual_budget_sheet"
+ANNUAL_BUDGET_QUERY = "annual_budget_sheet"
 
 # Authentication (Choose the appropriate method)
 KCSB = KustoConnectionStringBuilder.with_az_cli_authentication(CLUSTER)
+KCSB_INGEST = KustoConnectionStringBuilder.with_az_cli_authentication(CLUSTER.replace("https://", "https://ingest-"))
 
 # Create Kusto Client
 client = KustoClient(KCSB)
 
+def ingest_summary(KCSB_INGEST, summary):
+    
+    ingest_client = QueuedIngestClient(KCSB_INGEST)
+    
+    # Save DataFrame as CSV for ingestion
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as temp_file:
+        summary.to_csv(temp_file.name, header=None, index=False)  # Save DataFrame to CSV
+        temp_filename = temp_file.name
+        
+        # Define Ingestion Properties
+        ingestion_props = IngestionProperties(
+            database=DATABASE,
+            table="summary",
+            data_format=DataFormat.CSV,  # You can also use JSON or Parquet
+            report_level=ReportLevel.FailuresAndSuccesses,
+            flush_immediately=True  # Ensure data is available quickly
+            )
+        
+        # Ingest the CSV file into ADX
+        ingest_client.ingest_from_file(temp_filename, ingestion_properties=ingestion_props)
+
+
 # Execute the query
-response_1 = client.execute(DATABASE, QUERY_1)
-response_2 = client.execute(DATABASE, QUERY_2)
-response_3 = client.execute(DATABASE, QUERY_3)
+response_1 = client.execute(DATABASE, BILLED_QUERY)
+response_2 = client.execute(DATABASE, BUDGET_QUERY)
+response_3 = client.execute(DATABASE, ANNUAL_BUDGET_QUERY)
 
 # Convert response to Pandas DataFrame
-cleaned_unbilled = dataframe_from_result_table(response_1.primary_results[0])
+cleaned_billed = dataframe_from_result_table(response_1.primary_results[0])
 cleaned_budget_tracker = dataframe_from_result_table(response_2.primary_results[0])
 annual_budget = dataframe_from_result_table(response_3.primary_results[0])
 
-# Group by 'Campaign' 'Channel', 'Division' and 'Month' then sum the relevant numerical columns
-annual_summary = cleaned_unbilled.groupby(["Campaign", "Channel", "Division", "Month"], as_index=False).agg({
-    "Division": "first",  # Keeps the first occurrence
-    "NetBillable": "sum",
-    "AgencyCommission": "sum",
-    "LevyASBOF": "sum",
-    "ProductCode": "first",  # Keeps the first occurrence
-    "NormalisedProductName": 'first',
-    "PO_Number": lambda x: ", ".join(sorted(set(x.dropna()))),  # Unique sorted PO numbers
-    "Market": lambda x: ", ".join(sorted(set(x.dropna()))),  # Unique sorted markets
-    "Total_Invoice_Val": "sum"  # Sum total invoice values
-})
-
 # Append total rows for each campaign
-overall_totals = annual_summary.groupby(['Campaign', 'Division']).agg({
+overall_totals = cleaned_billed.groupby(['Campaign', 'Market','Division']).agg({
     'NetBillable': 'sum',
     'AgencyCommission': 'sum',
     'LevyASBOF': 'sum',
     'Total_Invoice_Val': 'sum',
     'ProductCode': 'first',
     'NormalisedProductName': 'first',
-    'PO_Number': 'first',
-    'Market': 'first'
+    'PO_Number': 'first'
 }).reset_index()
 
-overall_totals['Channel'] = "Total"
-overall_totals['Month'] = "Total"
+overall_totals['Channel'] = 'Total'
+overall_totals['Month'] = 'Total'
+
 
 # Combine the detailed and total rows
-unmatched_df = pd.concat([annual_summary, overall_totals], ignore_index=True)
+unmatched_df = pd.concat([cleaned_billed, overall_totals], ignore_index=True)
 
 # Reset index, sort results and display
-unmatched_df = unmatched_df.sort_values(by=['Division', 'Campaign', 'Month'])
+unmatched_df = unmatched_df.sort_values(by=['Division', 'Campaign', 'Market', 'Month'])
 unmatched_df = unmatched_df.reset_index(drop=True)
+
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+
+# print(unmatched_df)
 
 # make campaign names lowercase
 unmatched_df["NormalisedProductName"] = unmatched_df["NormalisedProductName"].str.lower()
 
-# Perform the merge (joining on "Normalised Product Name" and "Campaign")
-merged_df = unmatched_df.merge(
+# Separate "total" rows from unmatched_df
+totals_df = unmatched_df[unmatched_df["Channel"] == "Total"].copy()
+non_totals_df = unmatched_df[unmatched_df["Channel"] != "Total"]
+
+# Merge totals_df with cleaned_budget_tracker based on NormalisedProductName and Campaign
+merged_totals_df = totals_df.merge(
     cleaned_budget_tracker,
-    left_on="NormalisedProductName",
-    right_on="Campaign",
-    how="left"  
+    left_on=["NormalisedProductName","Market"],
+    right_on=["Campaign","Market"],
+    how="left"
 )
+# print("totals")
+# print(merged_totals_df)
+# print("non totals")
+# print(non_totals_df)
 
-merged_df = merged_df.drop(columns=['NormalisedProductName', 'Campaign_y'])
-merged_df = merged_df.rename(columns={"Campaign_x": "Campaign"})
+non_totals_df = non_totals_df.sort_values(by=['Division', 'Campaign', 'Channel', 'Market'])
+merged_totals_df = merged_totals_df.sort_values(by=['Division', 'PO_Number'])
+merged_totals_df.rename(columns={"Campaign_x": "Campaign"}, inplace=True)
 
+# print(merged_totals_df)
+
+# Concatenate non-total and total rows
+final_merged_df = pd.concat([non_totals_df, merged_totals_df], ignore_index=True)
+
+# Sort by Division, Campaign, and SortOrder (ensuring totals appear last)
+final_merged_df = final_merged_df.sort_values(by=['Division', 'Campaign', 'Channel'])
+
+# Reset index
+final_merged_df = final_merged_df.reset_index(drop=True)
+
+# print(final_merged_df)
+
+"""
 last_budget_value = annual_budget["2024 CURRENT FORECAST Year 2025 Budget"].dropna().iloc[-1]
 
-last_fnb_index = merged_df[merged_df["Division"] == "F&B"].index.max()
+last_fnb_index = final_merged_df[final_merged_df["Division"] == "F&B"].index.max()
 
 # Create the new row
 new_row = pd.DataFrame({
@@ -332,19 +379,22 @@ new_row = pd.DataFrame({
     "ChanelBudget": [last_budget_value]
 })
 
-merged_df = pd.concat([merged_df.iloc[:last_fnb_index + 1], new_row, merged_df.iloc[last_fnb_index + 1:]], ignore_index=True)
 
-columns_order = ['PO_Number', 'Campaign', 'Channel', 'ProductCode', 'NetBillable', 'AgencyCommission', 'LevyASBOF', 'Total_Invoice_Val', 'PlannedSpend', 'ReservedBudget', 'TotalBudget', 'ChanelBudget', 'Market', 'Month', 'Division']
-merged_df = merged_df[columns_order]
+merged_df = pd.concat([final_merged_df.iloc[:last_fnb_index + 1], new_row, final_merged_df.iloc[last_fnb_index + 1:]], ignore_index=True)
 
-pd.set_option('display.max_columns', None)
+"""
 
+columns_to_keep = ['PO_Number', 'Campaign', 'Channel', 'ProductCode', 'TotalBudget', 'NetBillable', 'AgencyCommission', 'LevyASBOF', 'Total_Invoice_Val', 'PlannedSpend', 'ReservedBudget', 'Market', 'Division', 'InvoiceNo', 'Month']
+
+summary_df = final_merged_df[columns_to_keep]
+
+"""
 # Identify numerical columns
 numerical_cols = ['NetBillable', 'AgencyCommission', 'LevyASBOF', 'Total_Invoice_Val', 
                   'PlannedSpend', 'ReservedBudget', 'TotalBudget', 'ChanelBudget']
 
-# Identify non-numerical columns to keep (excluding 'Month')
-non_numerical_cols = ['PO_Number', 'ProductCode', 'Campaign', 'Channel', 'Market', 'Division']
+# Identify non-numerical columns to keep
+non_numerical_cols = ['PO_Number', 'ProductCode', 'Campaign', 'Channel', 'Market', 'Division', 'Month', 'InvoiceNo']
 
 # Group by 'Campaign' and 'Channel', summing numerical columns
 summary_df = merged_df.groupby(['PO_Number','Campaign', 'Channel'], as_index=False)[numerical_cols].sum()
@@ -352,11 +402,31 @@ summary_df = merged_df.groupby(['PO_Number','Campaign', 'Channel'], as_index=Fal
 # Merge back non-numerical columns (excluding 'Month')
 summary_df = summary_df.merge(merged_df[non_numerical_cols].drop_duplicates(), on=['PO_Number','Campaign','Channel'], how='left')
 
+"""
+
 # Drop duplicates to ensure clean merging
 summary_df = summary_df.drop_duplicates()
 
-summary_columns_order = ['PO_Number', 'Campaign', 'Channel', 'ProductCode', 'NetBillable', 'AgencyCommission', 'LevyASBOF', 'Total_Invoice_Val', 'PlannedSpend', 'ReservedBudget', 'TotalBudget', 'ChanelBudget', 'Market', 'Division']
-ordered_summary_df = summary_df[summary_columns_order]
+summary_df.loc[:, "StartDate"] = None
+summary_df.loc[:, "EndDate"] = None
+summary_df.loc[:, "POCloseDownDate"] = None
+
+#rename Total_Invoice_Val to TotalInvoicedToDate
+summary_df.rename(columns={'Total_Invoice_Val': 'TotalInvoicedToDate'}, inplace=True)
+
+# Add TotalPOValue and POValueRemaining columns
+summary_df['TotalPOValue'] = summary_df['AgencyCommission'] + summary_df['LevyASBOF'] + summary_df['TotalBudget']
+summary_df['POValueRemaining'] = summary_df['TotalPOValue'] - summary_df['TotalInvoicedToDate']
+
+# Ensure budget-related values only appear where Channel == "Total"
+columns_to_clear = [
+    "TotalPOValue", "TotalInvoicedToDate", "POValueRemaining", "TotalBudget", "PlannedSpend", "ReservedBudget", "ChanelBudget"]
+
+summary_df.loc[summary_df["Channel"] != "Total", columns_to_clear] = None  # Set non-"Total" rows to NaN
+
+ordered_columns = ['PO_Number', 'Campaign', 'StartDate', 'EndDate', 'POCloseDownDate', 'Channel', 'ProductCode', 'TotalBudget', 'NetBillable', 'AgencyCommission', 'LevyASBOF', 'TotalPOValue', 'TotalInvoicedToDate', 'POValueRemaining', 'PlannedSpend', 'ReservedBudget', 'Market', 'Division', 'InvoiceNo', 'Month']
+
+ordered_summary_df = summary_df[ordered_columns]
 
 # Identify campaigns that appear at least three times
 campaign_counts = summary_df['Campaign'].value_counts()
@@ -378,31 +448,6 @@ summary_df.loc[summary_df['Channel'] == "Total", non_numeric_cols] = None
 filename = "FormattedAnnualBudget.xlsx"
 divisions = ordered_summary_df['Division'].unique()
 
-
-if os.path.exists(filename) and os.path.getsize(filename) > 0:
-    wb = load_workbook(filename)
-    
-    for sheet_name in wb.sheetnames:
-        ws = wb[sheet_name]
-
-        # Identify the range where headers will go
-        first_data_row = 3  # Data will be written from row 3 onwards
-        header_start_col = 1  # Assuming headers start from the first column
-        header_end_col = len(ordered_summary_df.columns)-1  # Get the last column dynamically
-
-        # Merge the first two rows for the header section
-        for col in range(header_start_col, header_end_col + 1):
-            ws.merge_cells(start_row=1, start_column=col, end_row=2, end_column=col)
-            merged_cell = ws.cell(row=1, column=col)
-            merged_cell.alignment = Alignment(horizontal="center", vertical="center")
-            merged_cell.font = Font(bold=True, size=12)
-
-        print(f"Headers merged from row 1 to 2 across columns {header_start_col} to {header_end_col}")
-
-    wb.save(filename)  # Save changes before writing data
-
-
-
 with pd.ExcelWriter(filename, engine='openpyxl') as writer:
     for division in divisions:
         df_division = ordered_summary_df[ordered_summary_df['Division'] == division]
@@ -419,54 +464,72 @@ if os.path.exists(filename) and os.path.getsize(filename) > 0:
     
     for sheet_name in wb.sheetnames:
         ws = wb[sheet_name]
-
-        # Get the column index for 'Campaign' and 'PO_Number' headers
-        header_row = 1  # Assuming the header is in the first row
-        campaign_col_index = None
-        po_number_col_index = None
         
+        # Get the column index for relevant headers
+        header_row = 1
+        columns_to_merge_by_value = ["Campaign", "PO_Number", "Channel"]
+        columns_to_merge_like_po = ["StartDate", "EndDate", "POCloseDownDate"]
+        all_columns_to_merge = columns_to_merge_by_value + columns_to_merge_like_po
+
+        column_indices = {}
+
         # Search for the columns by header name
         for col_idx, cell in enumerate(ws[header_row], start=1):
-            if cell.value == 'Campaign':
-                campaign_col_index = col_idx
-            elif cell.value == 'PO_Number':
-                po_number_col_index = col_idx
+            if cell.value in columns_to_merge_by_value:
+                column_indices[cell.value] = col_idx
 
-        # Ensure both columns are found
-        if campaign_col_index is None or po_number_col_index is None:
-            print("Error: 'Campaign' or 'PO_Number' column not found in the sheet.")
+        # Ensure all columns are found
+        missing_columns = [col for col in columns_to_merge_by_value if col not in column_indices]
+        if missing_columns:
+            print(f"Error: Columns not found - {missing_columns}")
             continue
-        
-        # Merge cells for the columns 'Campaign' and 'PO_Number' where PO_Number repeats (except for the last one)
-        for col_index in [campaign_col_index, po_number_col_index]:
-            values = [ws.cell(row=row, column=col_index).value for row in range(2, ws.max_row + 1)]  # Get values in the column (skip header)
+
+        # Merge cells for each identified column
+        for col_name, col_index in column_indices.items():
+            values = [ws.cell(row=row, column=col_index).value for row in range(2, ws.max_row + 1)]  # Get values in column (skip header)
             
-            start_row = 0
+            start_row = 2  # First row where data starts
             for i in range(1, len(values)):
-                if values[i] != values[i - 1]:  # If value changes, the previous block is over
-                    if start_row is not None and i - start_row > 1:  # More than 1 row, merge
-                        ws.merge_cells(
-                            start_row=start_row + 2,
-                            end_row=i + 1,
-                            start_column=col_index,
-                            end_column=col_index
-                        )
-                    start_row = i  # Update start row for new block
-            # Last block merge (if needed)
-            if start_row is not None and len(values) - start_row >= 0:
+                if col_name in columns_to_merge_by_value:  # Merge when values are the same
+                    if values[i] != values[i - 1]:  # If value changes, merge previous block
+                        if i + 1 > start_row:  # Ensure more than 1 row exists
+                            ws.merge_cells(
+                                start_row=start_row,
+                                end_row=i + 1,
+                                start_column=col_index,
+                                end_column=col_index
+                            )
+                        start_row = i + 2  # Move to next block
+                
+                elif col_name in columns_to_merge_like_po:  # Merge exactly like PO_Number
+                    if values[i] != values[i - 1]:  # If value changes, merge previous block
+                        if i +1 > start_row:  # Ensure more than 1 row exists
+                            ws.merge_cells(
+                                start_row=start_row,
+                                end_row=i + 1,
+                                start_column=col_index,
+                                end_column=col_index
+                            )
+                        start_row = i + 2  # Move to next block
+            
+            # Merge the last block if needed
+            if start_row <= ws.max_row:
                 ws.merge_cells(
-                    start_row=start_row + 2,
-                    end_row=len(values) + 1,
+                    start_row=start_row,
+                    end_row=ws.max_row,
                     start_column=col_index,
                     end_column=col_index
                 )
+
+    wb.save(filename)
+    print("Merged cells successfully.")
                 
 
     # Assuming 'delete_column_from_sheets' and 'format_workbook' functions are defined as previous
     delete_column_from_sheets(wb, 'Division')
     format_workbook(wb)
     
-    # Define fill colors
+    # Define fill colours
     header_fill = PatternFill(start_color="48546C", end_color="48546C", fill_type="solid")  # Header background
     header_font = Font(color="FFFFFF", bold=True)  # White header text
     channel_fill = PatternFill(start_color="71AD47", end_color="71AD47", fill_type="solid")  # Green for Channel column
@@ -475,7 +538,7 @@ if os.path.exists(filename) and os.path.getsize(filename) > 0:
     total_row_fill = PatternFill(start_color="BFBFBF", end_color="BFBFBF", fill_type="solid")  # Gray for total rows
     
     # Columns to format
-    product_columns = ["ProductCode", "NetBillable", "AgencyCommission", "LevyASBOF"]
+    product_columns = ["ProductCode", "TotalBudget", "NetBillable", "AgencyCommission", "LevyASBOF"]
     invoice_column = "TotalInvoiceVal"
     channel_column = "Channel"
     
@@ -517,11 +580,10 @@ if os.path.exists(filename) and os.path.getsize(filename) > 0:
                         cell.fill = total_row_fill
 
     wb.save(filename)
-    print("Formatted Excel workbook with merged cells for repeated PO Numbers and Campaigns has been saved successfully.")
 else:
     print("Error: The file does not exist or is empty.")
 # Usage
 filename = 'FormattedAnnualBudget.xlsx'  # Specify the path to your file
 start_col = 16  # Adjust as necessary to the column where the January headers should begin
-append_monthly_tables_to_excel(filename, start_col)
-print("Monthly tables have been added and formatted successfully.")
+# append_monthly_tables_to_excel(filename, start_col)
+# ingest_summary(KCSB_INGEST, merged_df)
