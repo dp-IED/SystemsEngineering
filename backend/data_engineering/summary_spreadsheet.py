@@ -78,7 +78,7 @@ def append_monthly_tables_to_excel(filename, start_col):
     sheet = book.active  # Using the active sheet, adjust if needed to target a specific sheet
 
     # Define the data structure for headers
-    headers = ['Net Billable', 'Agency Commission', 'Levy (ASBOF)', 'Total Invoice val']
+    headers = ['NetBillable', 'AgencyCommission', 'LevyASBOF', 'TotalInvoicedToDate']
     months = ['January', 'February', 'March', 'April', 'May', 'June', 
               'July', 'August', 'September', 'October', 'November', 'December']
 
@@ -101,7 +101,6 @@ def append_monthly_tables_to_excel(filename, start_col):
             header_cell.value = header
             header_cell.alignment = Alignment(horizontal="center", vertical="center")
             header_cell.font = Font(bold=True, size=12)
-
     
     # Adjust column widths
     set_column_width(sheet, start_col, headers, months)
@@ -109,7 +108,7 @@ def append_monthly_tables_to_excel(filename, start_col):
     # Save the workbook
     book.save(filename)
     book.close()
-    print("Monthly tables have been added and formatted successfully.")
+    print("Data has been populated successfully.")
 
 
 # Define ADX information
@@ -138,8 +137,10 @@ billed_report
 )
 // add column of media names from PO tracker
 | extend Channel = case(
-    MediaName == "SEARCH&SOC", "Social & PPC",
-    MediaName == "DISPLAY", "Display & VOD",
+    ClientCode == "C60" or ClientCode == "C65", "PPC",
+    MediaName == "SEARCH&SOC" and ClientCode != "C60" and ClientCode != "C65", "Social",
+    MediaName == "DISPLAY" and CampaignName contains "VIDEO", "Video",
+    MediaName == "DISPLAY" and CampaignName !contains "VIDEO", "Display",
     MediaName == "PRESS", "Print",
     MediaName == "CINEMA", "Cinema",
     MediaName == "TELEVISION", "TV",
@@ -155,6 +156,7 @@ billed_report
     ProductName contains "WATCHES", "Watches",
     ProductName == "BLEU", "Bleu",
     ProductName == "UK", "PPC",
+    ProductName == "IRE" or ProductName == "ROI", "PPC",
     ProductName contains "MAKE UP" or ProductName contains "LES BEIGE", "Make Up",
     ProductName contains "SKINCARE", "Skincare",
     ProductName contains "CHANCE", "Chance",
@@ -285,7 +287,7 @@ def ingest_summary(KCSB_INGEST, summary):
         # Define Ingestion Properties
         ingestion_props = IngestionProperties(
             database=DATABASE,
-            table="summary",
+            table="new_summary",
             data_format=DataFormat.CSV,  # You can also use JSON or Parquet
             report_level=ReportLevel.FailuresAndSuccesses,
             flush_immediately=True  # Ensure data is available quickly
@@ -327,7 +329,7 @@ unmatched_df = pd.concat([cleaned_billed, overall_totals], ignore_index=True)
 unmatched_df = unmatched_df.sort_values(by=['Division', 'Campaign', 'Market', 'Month'])
 unmatched_df = unmatched_df.reset_index(drop=True)
 
-pd.set_option('display.max_rows', None)
+# pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 
 # print(unmatched_df)
@@ -366,7 +368,6 @@ final_merged_df = final_merged_df.sort_values(by=['Division', 'Campaign', 'Chann
 # Reset index
 final_merged_df = final_merged_df.reset_index(drop=True)
 
-# print(final_merged_df)
 
 """
 last_budget_value = annual_budget["2024 CURRENT FORECAST Year 2025 Budget"].dropna().iloc[-1]
@@ -387,6 +388,9 @@ merged_df = pd.concat([final_merged_df.iloc[:last_fnb_index + 1], new_row, final
 columns_to_keep = ['PO_Number', 'Campaign', 'Channel', 'ProductCode', 'TotalBudget', 'NetBillable', 'AgencyCommission', 'LevyASBOF', 'Total_Invoice_Val', 'PlannedSpend', 'ReservedBudget', 'Market', 'Division', 'InvoiceNo', 'Month']
 
 summary_df = final_merged_df[columns_to_keep]
+ingest_summary_df = summary_df
+# print(ingest_summary_df)
+
 
 """
 # Identify numerical columns
@@ -584,6 +588,7 @@ else:
     print("Error: The file does not exist or is empty.")
 # Usage
 filename = 'FormattedAnnualBudget.xlsx'  # Specify the path to your file
-start_col = 16  # Adjust as necessary to the column where the January headers should begin
-# append_monthly_tables_to_excel(filename, start_col)
-# ingest_summary(KCSB_INGEST, merged_df)
+start_col = 19  # Adjust as necessary to the column where the January headers should begin
+# print(summary_df)
+append_monthly_tables_to_excel(filename, start_col)
+ingest_summary(KCSB_INGEST, ingest_summary_df)
