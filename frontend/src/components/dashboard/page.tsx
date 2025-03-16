@@ -1,59 +1,136 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, TrendingDown } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, XAxis, Pie, PieChart, Cell, ResponsiveContainer } from "recharts";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-
-export interface Expense {
-  id: number;
-  name: string;
-  division: string;
-  campaign: string;
-  date: string;
-  amount: string;
-}
+import { OverallSpendingChart } from "@/components/charts/OverallSpendingChart";
+import { BudgetvsActualChart } from "../charts/BudgetvsActualChart";
+import BudgetTable from "./BudgetTable";
 
 const API_URL =
   "https://systemsteam17storage.blob.core.windows.net/summary/FormattedAnnualBudget.xlsx?se=2025-04-10T23%3A59%3A59Z&sp=r&sv=2022-11-02&sr=b&sig=1DvdyO%2BRgtocwWEPBo1GmfRZG4CimWg8QYHXYIEQ6a0%3D"; // Direct Blob URL
 
+//TODO: ADD MORE GRAPH TYPES
+
+interface FinancialMetrics {
+  netBillable: number;
+  agencyCommission: number;
+  levyASBOF: number;
+  invoiceVal: number;
+  plannedSpend: number;
+  reservedBudget: number;
+  totalBudget: number;
+  chanelBudget: number;
+}
+
+interface Channel {
+  name: string;
+  financials: FinancialMetrics;
+}
+
+export interface Campaign {
+  poNumber: string;
+  name: string;
+  channels: Channel[];
+  financials: FinancialMetrics;
+  market: string;
+  isSubCampaign?: boolean;
+  parentCampaignName?: string;
+}
+
 const ExpenseDashboard: React.FC = () => {
+  interface ParsedData {
+    fnb: Campaign[];
+    fshew: Campaign[];
+    wfj: Campaign[];
+  }
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [excelData, setExcelData] = useState<{ 
-    fnb: string[][]; 
-    fshew: string[][]; 
-    wfj: string[][]; 
-  }>({
+  const [parsedData, setParsedData] = useState<ParsedData>({
     fnb: [],
     fshew: [],
     wfj: [],
   });
-  
 
-  const recentTransactions: Expense[] = [
-    { id: 1, name: "Expense A", division: "F&B", campaign: "Bleu", date: "01/02/24", amount: "£10,500" },
-    { id: 2, name: "Expense B", division: "FSH&EW", campaign: "Les Beiges", date: "05/02/24", amount: "£25,300" },
-    { id: 3, name: "Expense C", division: "W&FJ", campaign: "Rouge Allure", date: "10/02/24", amount: "£5,200" },
-  ];
+  const parseExcelData = (rawData: string[][]): Campaign[] => {
+    // Skip header rows and handle empty data
+    if (!rawData || rawData.length < 3) return [];
+
+    const dataRows = rawData.slice(2);
+    const campaigns: Campaign[] = [];
+
+    dataRows.forEach((row, i) => {
+      // Skip total rows or empty rows
+      if (!row || row[2] === "Total") return;
+
+      // Extract financial metrics
+      const financials: FinancialMetrics = {
+        netBillable: Number(row[4]) || 0,
+        agencyCommission: Number(row[5]) || 0,
+        levyASBOF: Number(row[6]) || 0,
+        invoiceVal: Number(row[7]) || 0,
+        plannedSpend: Number(row[8]) || 0,
+        reservedBudget: Number(row[9]) || 0,
+        totalBudget: Number(row[10]) || 0,
+        chanelBudget: Number(row[11]) || 0,
+      };
+
+      // Main campaign with PO number
+      if (row[0]) {
+        campaigns.push({
+          poNumber: String(row[0] || ""),
+          name: String(row[1] || ""),
+          channels: [{
+            name: String(row[2] || ""),
+            financials: { ...financials },
+          }],
+          financials: { ...financials },
+          market: String(row[12] || ""),
+        });
+      } // Sub-campaign (has name but no PO)
+      else if (row[1] && row[2]) {
+        // Find parent campaign
+        let parentName = "";
+        for (let j = i - 1; j >= 0; j--) {
+          if (dataRows[j] && dataRows[j][0] && dataRows[j][1]) {
+            parentName = String(dataRows[j][1] || "");
+            break;
+          }
+        }
+
+        campaigns.push({
+          poNumber: "",
+          name: String(row[1] || ""),
+          channels: [{
+            name: String(row[2] || ""),
+            financials: { ...financials },
+          }],
+          financials: { ...financials },
+          market: String(row[12] || ""),
+          isSubCampaign: true,
+          parentCampaignName: parentName,
+        });
+      } // Channel only (add to most recent campaign)
+      else if (row[2] && campaigns.length > 0) {
+        const lastCampaign = campaigns[campaigns.length - 1];
+        lastCampaign.channels.push({
+          name: String(row[2] || ""),
+          financials: { ...financials },
+        });
+
+        // Update campaign totals
+        lastCampaign.financials.netBillable += financials.netBillable;
+        lastCampaign.financials.agencyCommission += financials.agencyCommission;
+        lastCampaign.financials.levyASBOF += financials.levyASBOF;
+        lastCampaign.financials.invoiceVal += financials.invoiceVal;
+        lastCampaign.financials.plannedSpend += financials.plannedSpend;
+        lastCampaign.financials.reservedBudget += financials.reservedBudget;
+      }
+    });
+
+    return campaigns;
+  };
 
   // Fetch Excel File from Backend and Parse it
   useEffect(() => {
@@ -61,26 +138,48 @@ const ExpenseDashboard: React.FC = () => {
       setIsLoading(true);
       try {
         const response = await fetch(API_URL, { method: "GET" });
-  
-        if (!response.ok) throw new Error("Failed to fetch file.");
-  
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch file. ${response.status}`);
+        }
+
         const blob = await response.blob();
         const reader = new FileReader();
-        reader.readAsBinaryString(blob);
+        reader.readAsArrayBuffer(blob);
         reader.onload = (e) => {
-          const binaryStr = e.target?.result as string;
-          const workbook = XLSX.read(binaryStr, { type: "binary" });
-  
+          const arrayBuffer = e.target?.result as string;
+          const workbook = XLSX.read(arrayBuffer, { type: "array" });
+
           // Extract sheets for each division
           const fnbSheet = workbook.Sheets["F&B"];
           const fshewSheet = workbook.Sheets["FSH&EW"];
           const wfjSheet = workbook.Sheets["W&FJ"];
-  
+
           // Convert each sheet to JSON format
-          setExcelData({
-            fnb: XLSX.utils.sheet_to_json(fnbSheet, { header: 1 }) as string[][],
-            fshew: XLSX.utils.sheet_to_json(fshewSheet, { header: 1 }) as string[][],
-            wfj: XLSX.utils.sheet_to_json(wfjSheet, { header: 1 }) as string[][],
+          const fnbRawData = XLSX.utils.sheet_to_json(fnbSheet, {
+            header: 1,
+          }) as string[][];
+          const fshewRawData = XLSX.utils.sheet_to_json(fshewSheet, {
+            header: 1,
+          }) as string[][];
+          const wfjRawData = XLSX.utils.sheet_to_json(wfjSheet, {
+            header: 1,
+          }) as string[][];
+
+          // Process the raw data into a more accessible format
+          const [processedFnb, processedFshew, processedWfj] = [
+            parseExcelData(fnbRawData),
+            parseExcelData(fshewRawData),
+            parseExcelData(wfjRawData),
+          ];
+
+          console.log([processedFnb, processedFshew, processedFshew]);
+
+          // Store the processed data in a separate state
+          setParsedData({
+            fnb: processedFnb,
+            fshew: processedFshew,
+            wfj: processedWfj,
           });
         };
       } catch (error) {
@@ -88,26 +187,9 @@ const ExpenseDashboard: React.FC = () => {
       }
       setIsLoading(false);
     };
-  
+
     fetchExcelFile();
   }, []);
-  
-  
-
-  const chartData = [
-    { month: "January", div1: 75, div2: 85, div3: 65 },
-    { month: "February", div1: 78, div2: 82, div3: 68 },
-    { month: "March", div1: 80, div2: 85, div3: 70 },
-    { month: "April", div1: 77, div2: 83, div3: 68 },
-    { month: "May", div1: 82, div2: 86, div3: 71 },
-    { month: "June", div1: 85, div2: 88, div3: 75 },
-  ];
-
-  const chartConfig = {
-    div1: { label: "F&B", color: "hsl(var(--chart-1))" },
-    div2: { label: "FSH&EW", color: "hsl(var(--chart-2))" },
-    div3: { label: "W&FJ", color: "hsl(var(--chart-3))" },
-  } satisfies ChartConfig;
 
   return (
     <div className="p-6 max-w-[1200px] mx-auto">
@@ -120,61 +202,33 @@ const ExpenseDashboard: React.FC = () => {
         </TabsList>
 
         <TabsContent value="overview" className="space-y-8">
-          {/* 📌 Recent Transactions */}
-          <div className="mt-8">
-            <h2 className="text-2xl font-semibold mb-4">Recent Transactions</h2>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Division</TableHead>
-                  <TableHead>Campaign</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Amount</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {recentTransactions.map((expense) => (
-                  <TableRow key={expense.id}>
-                    <TableCell>{expense.name}</TableCell>
-                    <TableCell>{expense.division}</TableCell>
-                    <TableCell>{expense.campaign}</TableCell>
-                    <TableCell>{expense.date}</TableCell>
-                    <TableCell>{expense.amount}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-
-        
           {/* 📌 Excel File Preview */}
           <div className="mt-8">
-            <h2 className="text-2xl font-semibold mb-4">Budget Visualization</h2>
-            {isLoading ? (
-              <p>Loading Excel Data...</p>
-            ) : excelData.length > 0 ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    {excelData[0].map((header, index) => (
-                      <TableHead key={index}>{header}</TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {excelData.slice(1).map((row, rowIndex) => (
-                    <TableRow key={rowIndex}>
-                      {row.map((cell, cellIndex) => (
-                        <TableCell key={cellIndex}>{cell}</TableCell>
-                      ))}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            ) : (
-              <p>No data available.</p>
-            )}
+            <h2 className="text-2xl font-semibold mb-4">
+              Budget Visualization
+            </h2>
+            {isLoading
+              ? <p>Loading Excel Data...</p>
+              : parsedData
+              ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                  <OverallSpendingChart
+                    chartData={[
+                      parsedData.fnb,
+                      parsedData.fshew,
+                      parsedData.wfj,
+                    ].flat()}
+                  />
+                  <BudgetvsActualChart
+                    chartData={[
+                      parsedData.fnb,
+                      parsedData.fshew,
+                      parsedData.wfj,
+                    ].flat()}
+                  />
+                </div>
+              )
+              : <p>No data available.</p>}
           </div>
 
           {/* 📌 Download Button */}
@@ -186,154 +240,22 @@ const ExpenseDashboard: React.FC = () => {
             </Button>
           </div>
         </TabsContent>
-        {/* 🔹 F&B DIVISION */}
-<TabsContent value="division1">
-  <h2 className="text-2xl font-semibold mb-4">F&B Division</h2>
-
-  {isLoading ? (
-    <p>Loading Excel Data...</p>
-  ) : excelData.fnb.length > 0 ? (
-    <div className="overflow-x-auto border border-gray-300 shadow-md rounded-lg">
-
-      {/* 📌 Merged Summary & Monthly Breakdown Table */}
-<h3 className="text-lg font-semibold mt-4 mb-2">Budget Overview</h3>
-<Table className="w-full border-collapse">
-  <TableHeader className="bg-black text-white">
-    {/* First Row: Fixed Info Headers & Month Headers */}
-    <TableRow>
-      <TableHead className="p-3 font-bold text-center" rowSpan={2}>PO Number</TableHead>
-      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Campaign</TableHead>
-      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Channel</TableHead>
-      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Product Code</TableHead>
-      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Net Billable</TableHead>
-      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Agency Commission</TableHead>
-      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Levy (ASBOF)</TableHead>
-      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Total Invoice Val</TableHead>
-      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Planned Spend</TableHead>
-      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Reserved Budget</TableHead>
-      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Total Budget</TableHead>
-      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Channel Budget</TableHead>
-      <TableHead className="p-3 font-bold text-center" rowSpan={2}>Market</TableHead>
-      {[
-        "January", "February", "March", "April", "May", "June", 
-        "July", "August", "September", "October", "November", "December"
-      ].map((month, index) => (
-        <TableHead key={index} colSpan={4} className="p-3 font-bold text-center border">
-          {month}
-        </TableHead>
-      ))}
-    </TableRow>
-
-    {/* Second Row: 4 Subheaders Per Month */}
-    <TableRow>
-      {Array(12).fill(["Net Billable", "Agency Commission", "Levy (ASBOF)", "Total Invoice Val"])
-        .flat()
-        .map((subHeader, index) => (
-          <TableHead key={index} className="p-3 font-bold border">
-            {subHeader}
-          </TableHead>
-        ))}
-    </TableRow>
-  </TableHeader>
-
-  {/* Table Body with Data from Summary Spreadsheet */}
-  <TableBody>
-    {excelData.fnb.slice(1).map((row, rowIndex) => (
-      <TableRow key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-50" : "bg-white"}>
-        {/* Fixed Info Columns */}
-        {row.slice(0, 13).map((cell, cellIndex) => (
-          <TableCell key={cellIndex} className="border border-gray-200 p-3 text-center">
-            {cell}
-          </TableCell>
-        ))}
-
-        {/* Monthly Data: Net Billable, Agency Commission, Levy, Total Invoice */}
-        {row.slice(13).map((cell, cellIndex) => (
-          <TableCell key={cellIndex} className="border border-gray-200 p-3 text-center">
-            {cell}
-          </TableCell>
-        ))}
-      </TableRow>
-    ))}
-  </TableBody>
-</Table>
-
-
-    </div>
-  ) : (
-    <p>No data available.</p>
-  )}
-</TabsContent>
-
-
-        {/* 🔹 FSH&EW DIVISION */}
-        <TabsContent value="division2">
-          <h2 className="text-2xl font-semibold mb-4">FSH&EW Division</h2>
-          {isLoading ? (
-            <p>Loading Excel Data...</p>
-          ) : excelData.fshew.length > 0 ? (
-            <div className="overflow-x-auto border border-gray-300 shadow-md rounded-lg">
-              <Table className="w-full border-collapse">
-                <TableHeader className="bg-black text-white">
-                  <TableRow>
-                    {excelData.fshew[0].map((header, index) => (
-                      <TableHead key={index} className="p-3 font-bold">
-                        {header}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {excelData.fshew.slice(1).map((row, rowIndex) => (
-                    <TableRow key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-50" : "bg-white"}>
-                      {row.map((cell, cellIndex) => (
-                        <TableCell key={cellIndex} className="border border-gray-200 p-3 text-center">
-                          {cell}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          ) : (
-            <p>No data available.</p>
-          )}
+        {/* 🔹 F&B DIVISION - Now using the reusable component */}
+        <TabsContent value="division1">
+          <h2 className="text-2xl font-semibold mb-4">F&B Division</h2>
+          <BudgetTable data={parsedData.fnb} isLoading={isLoading} />
         </TabsContent>
 
-        {/* 🔹 W&FJ DIVISION */}
+        {/* 🔹 FSH&EW DIVISION - Now using the reusable component */}
+        <TabsContent value="division2">
+          <h2 className="text-2xl font-semibold mb-4">FSH&EW Division</h2>
+          <BudgetTable data={parsedData.fshew} isLoading={isLoading} />
+        </TabsContent>
+
+        {/* 🔹 W&FJ DIVISION - Now using the reusable component */}
         <TabsContent value="division3">
           <h2 className="text-2xl font-semibold mb-4">W&FJ Division</h2>
-          {isLoading ? (
-            <p>Loading Excel Data...</p>
-          ) : excelData.wfj.length > 0 ? (
-            <div className="overflow-x-auto border border-gray-300 shadow-md rounded-lg">
-              <Table className="w-full border-collapse">
-                <TableHeader className="bg-black text-white">
-                  <TableRow>
-                    {excelData.wfj[0].map((header, index) => (
-                      <TableHead key={index} className="p-3 font-bold">
-                        {header}
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {excelData.wfj.slice(1).map((row, rowIndex) => (
-                    <TableRow key={rowIndex} className={rowIndex % 2 === 0 ? "bg-gray-50" : "bg-white"}>
-                      {row.map((cell, cellIndex) => (
-                        <TableCell key={cellIndex} className="border border-gray-200 p-3 text-center">
-                          {cell}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          ) : (
-            <p>No data available.</p>
-          )}
+          <BudgetTable data={parsedData.wfj} isLoading={isLoading} />
         </TabsContent>
       </Tabs>
     </div>
