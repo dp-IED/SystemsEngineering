@@ -302,162 +302,180 @@ response_1 = client.execute(DATABASE, BILLED_QUERY)
 response_2 = client.execute(DATABASE, BUDGET_QUERY)
 response_3 = client.execute(DATABASE, ANNUAL_BUDGET_QUERY)
 
+data = dataframe_from_result_table(response_1.primary_results[0])
+
+
 # Convert response to Pandas DataFrame
 cleaned_billed = dataframe_from_result_table(response_1.primary_results[0])
 cleaned_budget_tracker = dataframe_from_result_table(response_2.primary_results[0])
 annual_budget = dataframe_from_result_table(response_3.primary_results[0])
 
 # Append total rows for each campaign
-overall_totals = cleaned_billed.groupby(['Campaign', 'Market','Division']).agg({
+overall_totals = cleaned_billed.groupby(['PO_Number', 'Market','Division']).agg({
+    'Campaign': 'first',
     'NetBillable': 'sum',
     'AgencyCommission': 'sum',
     'LevyASBOF': 'sum',
     'Total_Invoice_Val': 'sum',
     'ProductCode': 'first',
     'NormalisedProductName': 'first',
+}).reset_index()
+overall_totals['Channel'] = "Total"
+ 
+channel_totals = cleaned_billed.groupby(['Campaign','Channel','Market','Division']).agg({
+    'NetBillable': 'sum',
+    'AgencyCommission': 'sum',
+    'LevyASBOF': 'sum',
+    'Total_Invoice_Val': 'sum',
     'PO_Number': 'first'
 }).reset_index()
-
-overall_totals['Channel'] = 'Total'
+ 
+overall_totals['InvoiceNo'] = 'Total'
 overall_totals['Month'] = 'Total'
-
-
-# Combine the detailed and total rows
-unmatched_df = pd.concat([cleaned_billed, overall_totals], ignore_index=True)
-
-# Reset index, sort results and display
-unmatched_df = unmatched_df.sort_values(by=['Division', 'Campaign', 'Market', 'Month'])
-unmatched_df = unmatched_df.reset_index(drop=True)
-
-# pd.set_option('display.max_rows', None)
-pd.set_option('display.max_columns', None)
-
-# print(unmatched_df)
-
+ 
+# sort dataframes
+overall_totals = overall_totals.sort_values(by=['Division', 'Campaign', 'Market'])
+sorted_billed = cleaned_billed.sort_values(by=['Division', 'Campaign', 'Market'])
+ 
 # make campaign names lowercase
-unmatched_df["NormalisedProductName"] = unmatched_df["NormalisedProductName"].str.lower()
-
-# Separate "total" rows from unmatched_df
-totals_df = unmatched_df[unmatched_df["Channel"] == "Total"].copy()
-non_totals_df = unmatched_df[unmatched_df["Channel"] != "Total"]
-
+overall_totals['NormalisedProductName'] = overall_totals['NormalisedProductName'].str.lower()
+cleaned_billed['NormalisedProductName'] = cleaned_billed['NormalisedProductName'].str.lower()
+ 
+# dataframe to use for monthly summary
+monthly_summary = pd.concat([cleaned_billed, overall_totals], ignore_index=True)
+ 
+# Create a custom sort key that moves "Total" rows to the bottom
+monthly_summary['is_total'] = monthly_summary['Channel'].str.contains('Total', na=False)
+ 
+# Sort by PO_Number, then by the 'is_total' flag (False first, then True), then by Campaign (if needed)
+monthly_summary = monthly_summary.sort_values(by=['Division', 'PO_Number', 'is_total', 'Campaign', 'Channel'], ascending=[True, True, True, True, True])
+ 
+# Drop columns
+monthly_summary = monthly_summary.drop(columns=['is_total'])
+monthly_summary = monthly_summary.drop(columns=['NormalisedProductName'])
+ 
+pd.set_option('display.max_rows', None)
+ 
+ 
 # Merge totals_df with cleaned_budget_tracker based on NormalisedProductName and Campaign
-merged_totals_df = totals_df.merge(
+merged_totals_df = overall_totals.merge(
     cleaned_budget_tracker,
     left_on=["NormalisedProductName","Market"],
     right_on=["Campaign","Market"],
     how="left"
 )
-# print("totals")
-# print(merged_totals_df)
-# print("non totals")
-# print(non_totals_df)
-
-non_totals_df = non_totals_df.sort_values(by=['Division', 'Campaign', 'Channel', 'Market'])
-merged_totals_df = merged_totals_df.sort_values(by=['Division', 'PO_Number'])
+ 
+non_totals_df = cleaned_billed.sort_values(by=['Division', 'Campaign', 'Channel', 'Market'])
+ 
+# sort and rename values
+merged_totals_df = merged_totals_df.sort_values(by=['Division', 'PO_Number', 'Campaign_x'])
 merged_totals_df.rename(columns={"Campaign_x": "Campaign"}, inplace=True)
-
-# print(merged_totals_df)
-
-# Concatenate non-total and total rows
+ 
+# create merged df with non total and total values
 final_merged_df = pd.concat([non_totals_df, merged_totals_df], ignore_index=True)
-
-# Sort by Division, Campaign, and SortOrder (ensuring totals appear last)
+ 
+# Create merged df with channel totals and overall totals
+channel_summary = pd.concat([channel_totals, merged_totals_df], ignore_index=True)
+ 
+# Create a custom sort key that moves "Total" rows to the bottom
+channel_summary['is_total'] = channel_summary['Channel'].str.contains('Total', na=False)
+ 
+# Sort by PO_Number, then by the 'is_total' flag (False first, then True), then by Campaign (if needed)
+channel_summary = channel_summary.sort_values(by=['Division', 'PO_Number', 'is_total', 'Campaign', 'Channel'], ascending=[True, True, True, True, True])
+ 
+# Drop the temporary 'is_total' column
+channel_summary = channel_summary.drop(columns=['is_total'])
+ 
+# Sort by Division, Campaign, and Channel (ensuring totals appear last)
 final_merged_df = final_merged_df.sort_values(by=['Division', 'Campaign', 'Channel'])
-
+ 
 # Reset index
 final_merged_df = final_merged_df.reset_index(drop=True)
-
-
-"""
-last_budget_value = annual_budget["2024 CURRENT FORECAST Year 2025 Budget"].dropna().iloc[-1]
-
-last_fnb_index = final_merged_df[final_merged_df["Division"] == "F&B"].index.max()
-
-# Create the new row
-new_row = pd.DataFrame({
-    "Division": ["F&B"], 
-    "ChanelBudget": [last_budget_value]
-})
-
-
-merged_df = pd.concat([final_merged_df.iloc[:last_fnb_index + 1], new_row, final_merged_df.iloc[last_fnb_index + 1:]], ignore_index=True)
-
-"""
-
-columns_to_keep = ['PO_Number', 'Campaign', 'Channel', 'ProductCode', 'TotalBudget', 'NetBillable', 'AgencyCommission', 'LevyASBOF', 'Total_Invoice_Val', 'PlannedSpend', 'ReservedBudget', 'Market', 'Division', 'InvoiceNo', 'Month']
-
+final_merged_df = final_merged_df.drop(columns=['NormalisedProductName', 'Campaign_y'])
+ 
+ 
+columns_to_keep = ['PO_Number', 'Campaign', 'Channel', 'ProductCode', 'TotalBudget', 'NetBillable', 'AgencyCommission', 'LevyASBOF', 'Total_Invoice_Val', 'Market', 'Division', 'InvoiceNo', 'Month']
+columns_to_keep_channel = ['PO_Number', 'Campaign', 'Channel', 'ProductCode', 'PlannedSpend', 'ReservedBudget', 'TotalBudget', 'NetBillable', 'AgencyCommission', 'LevyASBOF', 'Total_Invoice_Val', 'Market', 'Division', 'InvoiceNo']
+ 
+ 
+# only keep required columns
 summary_df = final_merged_df[columns_to_keep]
-ingest_summary_df = summary_df
-# print(ingest_summary_df)
-
-
-"""
-# Identify numerical columns
-numerical_cols = ['NetBillable', 'AgencyCommission', 'LevyASBOF', 'Total_Invoice_Val', 
-                  'PlannedSpend', 'ReservedBudget', 'TotalBudget', 'ChanelBudget']
-
-# Identify non-numerical columns to keep
-non_numerical_cols = ['PO_Number', 'ProductCode', 'Campaign', 'Channel', 'Market', 'Division', 'Month', 'InvoiceNo']
-
-# Group by 'Campaign' and 'Channel', summing numerical columns
-summary_df = merged_df.groupby(['PO_Number','Campaign', 'Channel'], as_index=False)[numerical_cols].sum()
-
-# Merge back non-numerical columns (excluding 'Month')
-summary_df = summary_df.merge(merged_df[non_numerical_cols].drop_duplicates(), on=['PO_Number','Campaign','Channel'], how='left')
-
-"""
-
-# Drop duplicates to ensure clean merging
+channel_summary = channel_summary[columns_to_keep_channel]
+ 
+# Drop duplicates
 summary_df = summary_df.drop_duplicates()
-
-summary_df.loc[:, "StartDate"] = None
-summary_df.loc[:, "EndDate"] = None
-summary_df.loc[:, "POCloseDownDate"] = None
-
-#rename Total_Invoice_Val to TotalInvoicedToDate
-summary_df.rename(columns={'Total_Invoice_Val': 'TotalInvoicedToDate'}, inplace=True)
-
+ 
+# Add date columns
+monthly_summary.loc[:, "StartDate"] = None
+monthly_summary.loc[:, "EndDate"] = None
+monthly_summary.loc[:, "POCloseDownDate"] = None
+channel_summary.loc[:, "StartDate"] = None
+channel_summary.loc[:, "EndDate"] = None
+channel_summary.loc[:, "POCloseDownDate"] = None
+ 
+ 
 # Add TotalPOValue and POValueRemaining columns
 summary_df['TotalPOValue'] = summary_df['AgencyCommission'] + summary_df['LevyASBOF'] + summary_df['TotalBudget']
-summary_df['POValueRemaining'] = summary_df['TotalPOValue'] - summary_df['TotalInvoicedToDate']
-
+summary_df['POValueRemaining'] = summary_df['TotalPOValue'] - summary_df['Total_Invoice_Val']
+channel_summary['TotalPOValue'] = channel_summary['AgencyCommission'] + channel_summary['LevyASBOF'] + channel_summary['TotalBudget']
+channel_summary['POValueRemaining'] = channel_summary['TotalPOValue'] - channel_summary['Total_Invoice_Val']
+ 
+# Create a custom sort key that moves "Total" rows to the bottom
+summary_df['is_total'] = summary_df['Channel'].str.contains('Total', na=False)
+ 
+# Sort by PO_Number, then by the 'is_total' flag (False first, then True), then by Campaign (if needed)
+summary_df = summary_df.sort_values(by=['Division', 'PO_Number', 'is_total', 'Campaign', 'Channel'], ascending=[True, True, True, True, True])
+ 
+# Drop the temporary 'is_total' column
+summary_df = summary_df.drop(columns=['is_total'])
+ 
+pd.set_option('display.max_columns', None)
+# print(summary_df)
+ 
 # Ensure budget-related values only appear where Channel == "Total"
 columns_to_clear = [
-    "TotalPOValue", "TotalInvoicedToDate", "POValueRemaining", "TotalBudget", "PlannedSpend", "ReservedBudget", "ChanelBudget"]
-
+    "TotalPOValue", "Total_Invoice_Val", "POValueRemaining", "TotalBudget", "PlannedSpend", "ReservedBudget", "ChanelBudget"]
+ 
 summary_df.loc[summary_df["Channel"] != "Total", columns_to_clear] = None  # Set non-"Total" rows to NaN
-
-ordered_columns = ['PO_Number', 'Campaign', 'StartDate', 'EndDate', 'POCloseDownDate', 'Channel', 'ProductCode', 'TotalBudget', 'NetBillable', 'AgencyCommission', 'LevyASBOF', 'TotalPOValue', 'TotalInvoicedToDate', 'POValueRemaining', 'PlannedSpend', 'ReservedBudget', 'Market', 'Division', 'InvoiceNo', 'Month']
-
-ordered_summary_df = summary_df[ordered_columns]
-
+ 
 # Identify campaigns that appear at least three times
 campaign_counts = summary_df['Campaign'].value_counts()
 repeated_campaigns = campaign_counts[campaign_counts >= 3].index
-
+ 
 # Process only campaigns that need merging
 summary_df['PO_Number'] = summary_df.apply(
-    lambda row: row['PO_Number'] if row['Campaign'] not in repeated_campaigns or row['Channel'] == "Total" else None, axis=1
+    lambda row: row['PO_Number'] if (row['Campaign'] not in repeated_campaigns or pd.notna(row['PO_Number'])) else row['PO_Number'], axis=1
 )
+ 
 summary_df['Campaign'] = summary_df.apply(
-    lambda row: row['Campaign'] if row['Campaign'] not in repeated_campaigns or row['Channel'] == "Total" else None, axis=1
+    lambda row: row['Campaign'] if (row['Campaign'] not in repeated_campaigns or pd.notna(row['Campaign'])) else row['Campaign'], axis=1
 )
-
-# Set non-numeric values to None where 'Channel' is "Total"
+ 
+# Set non-numeric values to None where 'InvoiceNo' is "Total"
 non_numeric_cols = ['PO_Number', 'Campaign', 'Market', 'Division']
 summary_df.loc[summary_df['Channel'] == "Total", non_numeric_cols] = None
+ 
+ordered_columns = ['PO_Number', 'Campaign', 'Channel', 'ProductCode', 'TotalBudget', 'NetBillable', 'AgencyCommission', 'LevyASBOF', 'TotalPOValue', 'Total_Invoice_Val', 'POValueRemaining', 'PlannedSpend', 'ReservedBudget', 'Market', 'Division', 'InvoiceNo', 'Month']
+ordered_columns_channel = ['PO_Number', 'Campaign', 'Channel', 'ProductCode', 'TotalBudget', 'NetBillable', 'AgencyCommission', 'LevyASBOF', 'TotalPOValue', 'Total_Invoice_Val', 'POValueRemaining', 'PlannedSpend', 'ReservedBudget', 'Market', 'Division', 'InvoiceNo']
+ 
+ordered_summary_df = summary_df[ordered_columns]
+channel_summary = channel_summary[ordered_columns_channel]
+ 
+print(channel_summary)
+ 
+ingest_summary_df = ordered_summary_df
 
 # Save DataFrame to Excel, divided by 'Division'
 filename = "FormattedAnnualBudget.xlsx"
-divisions = ordered_summary_df['Division'].unique()
+divisions = channel_summary['Division'].unique()
 
 with pd.ExcelWriter(filename, engine='openpyxl') as writer:
     for division in divisions:
-        df_division = ordered_summary_df[ordered_summary_df['Division'] == division]
+        df_division = channel_summary[channel_summary['Division'] == division]
         sheet_name = str(division).replace(':', '').replace('\\', '').replace('/', '').replace('?', '').replace('*', '')[:31]  # Excel sheet name limits
         if sheet_name.strip() == '':
             sheet_name = 'Other'
+
         df_division.to_excel(writer, sheet_name=sheet_name, index=False)
 
 time.sleep(2)  # Ensure the file is written
@@ -468,7 +486,7 @@ if os.path.exists(filename) and os.path.getsize(filename) > 0:
     
     for sheet_name in wb.sheetnames:
         ws = wb[sheet_name]
-        
+        """"
         # Get the column index for relevant headers
         header_row = 1
         columns_to_merge_by_value = ["Campaign", "PO_Number", "Channel"]
@@ -527,7 +545,7 @@ if os.path.exists(filename) and os.path.getsize(filename) > 0:
 
     wb.save(filename)
     print("Merged cells successfully.")
-                
+    """           
 
     # Assuming 'delete_column_from_sheets' and 'format_workbook' functions are defined as previous
     delete_column_from_sheets(wb, 'Division')
@@ -592,3 +610,193 @@ start_col = 19  # Adjust as necessary to the column where the January headers sh
 # print(summary_df)
 append_monthly_tables_to_excel(filename, start_col)
 ingest_summary(KCSB_INGEST, ingest_summary_df)
+
+def save_dataframe_to_excel(df, filename, divisions):
+    """
+    Saves the DataFrame to an Excel file, splitting it into sheets by divisions.
+    """
+    with pd.ExcelWriter(filename, engine='openpyxl', mode='w') as writer:
+        for division in divisions:
+            df_division = df[df['Division'] == division]
+            sheet_name = str(division).replace(':', '').replace('\\', '').replace('/', '').replace('?', '').replace('*', '')[:31]
+            if sheet_name.strip() == '':
+                sheet_name = 'Other'
+            df_division.to_excel(writer, sheet_name=sheet_name, index=False)
+
+import numpy as np
+
+def create_monthly_summary_sheet(filename, data):
+    """
+    Creates the 'Monthly Summary' sheet with:
+    - Merged super headers for each month.
+    - 4 subheaders per month: NetBillable, AgencyCommission, LevyASBOF, TotalInvoicedToDate.
+    - Each row correctly mapped to its respective values.
+    - The total is placed at the end for each Campaign-Channel.
+    """
+    # Load existing workbook
+    book = load_workbook(filename)
+    
+    # Remove old sheet if it exists
+    if "Monthly Summary" in book.sheetnames:
+        del book["Monthly Summary"]
+
+    # Create new Monthly Summary sheet
+    sheet = book.create_sheet("Monthly Summary")
+
+    # Define headers
+    base_headers = ['PO_Number', 'Campaign', 'Channel', 'ProductCode']
+    months = ['January', 'February', 'March', 'April', 'May', 'June', 
+              'July', 'August', 'September', 'October', 'November', 'December']
+    metric_headers = ['NetBillable', 'AgencyCommission', 'LevyASBOF', 'TotalInvoicedToDate']
+
+    # Set up merged headers for months
+    row1 = 1  # Super header row
+    row2 = 2  # Subheader row
+
+    col_idx = 1  # Start column
+    for header in base_headers:
+        sheet.cell(row=row2, column=col_idx, value=header).font = Font(bold=True)
+        sheet.cell(row=row2, column=col_idx).alignment = Alignment(horizontal="center", vertical="center")
+        col_idx += 1
+
+    # Merge and set month headers
+    for month in months:
+        start_col = col_idx
+        end_col = col_idx + len(metric_headers) - 1
+        sheet.merge_cells(start_row=row1, start_column=start_col, end_row=row1, end_column=end_col)
+        month_cell = sheet.cell(row=row1, column=start_col, value=month)
+        month_cell.font = Font(bold=True, size=12)
+        month_cell.alignment = Alignment(horizontal="center", vertical="center")
+
+        # Set subheaders for each month
+        for metric in metric_headers:
+            sheet.cell(row=row2, column=col_idx, value=metric).font = Font(bold=True)
+            sheet.cell(row=row2, column=col_idx).alignment = Alignment(horizontal="center", vertical="center")
+            col_idx += 1
+
+    # **Populate Data Correctly (Fixing Repetitions)**
+    row_idx = 3  # Start inserting data from the 3rd row
+    campaign_channel_groups = data.groupby(['Campaign', 'Channel'])
+
+    # Start inserting data from row 3
+    row_idx = 3  
+
+    # Iterate over each unique Campaign + Channel combination
+    for (campaign, channel), group_data in data.groupby(['Campaign', 'Channel']):
+        col_idx = 1
+
+        row_idx = 3  # Start inserting data from the 3rd row
+
+        for _, row in data.iterrows():
+            col_idx = 1  # Reset column index for each row
+
+            # ✅ Ensure PO_Number, Campaign, and Channel are written for every row
+            sheet.cell(row=row_idx, column=col_idx, value=row['PO_Number'])
+            sheet.cell(row=row_idx, column=col_idx + 1, value=row['Campaign'])
+            sheet.cell(row=row_idx, column=col_idx + 2, value=row['Channel'])
+            sheet.cell(row=row_idx, column=col_idx + 3, value=row['ProductCode'])
+
+            col_idx += 4  # Move to the monthly data columns
+
+            # ✅ Retrieve and correctly assign the row's data based on the Month
+            net_billable = None if pd.isna(row['NetBillable']) else row['NetBillable']
+            agency_commission = None if pd.isna(row['AgencyCommission']) else row['AgencyCommission']
+            levy_asbof = None if pd.isna(row['LevyASBOF']) else row['LevyASBOF']
+            total_invoiced = None if pd.isna(row['Total_Invoice_Val']) else row['Total_Invoice_Val']
+
+            # ✅ Assign values to the correct month
+            if row['Month'] in months:  # ✅ Ensure the Month is valid before indexing
+                month_col_offset = months.index(row['Month']) * 4  # Offset based on month position
+                sheet.cell(row=row_idx, column=col_idx + month_col_offset, value=net_billable)
+                sheet.cell(row=row_idx, column=col_idx + month_col_offset + 1, value=agency_commission)
+                sheet.cell(row=row_idx, column=col_idx + month_col_offset + 2, value=levy_asbof)
+                sheet.cell(row=row_idx, column=col_idx + month_col_offset + 3, value=total_invoiced)
+
+            sheet.cell(row=row_idx, column=col_idx + month_col_offset, value=net_billable)
+            sheet.cell(row=row_idx, column=col_idx + month_col_offset + 1, value=agency_commission)
+            sheet.cell(row=row_idx, column=col_idx + month_col_offset + 2, value=levy_asbof)
+            sheet.cell(row=row_idx, column=col_idx + month_col_offset + 3, value=total_invoiced)
+
+            row_idx += 1  # Move to the next row for correct alignment
+
+
+        # Process each month
+        for month in months:
+            month_data = group_data[group_data['Month'] == month].reset_index(drop=True)
+
+            # Iterate over the rows of month_data to correctly insert values
+            for _, month_row in month_data.iterrows():
+                net_billable = None if pd.isna(month_row['NetBillable']) else month_row['NetBillable']
+                agency_commission = None if pd.isna(month_row['AgencyCommission']) else month_row['AgencyCommission']
+                levy_asbof = None if pd.isna(month_row['LevyASBOF']) else month_row['LevyASBOF']
+                total_invoiced = None if pd.isna(month_row['Total_Invoice_Val']) else month_row['Total_Invoice_Val']
+
+                # Insert each row's values correctly instead of just the first row repeatedly
+                sheet.cell(row=row_idx, column=col_idx, value=net_billable)
+                sheet.cell(row=row_idx, column=col_idx + 1, value=agency_commission)
+                sheet.cell(row=row_idx, column=col_idx + 2, value=levy_asbof)
+                sheet.cell(row=row_idx, column=col_idx + 3, value=total_invoiced)
+
+                row_idx += 1  # Move to the next row for correct alignment
+        
+            col_idx += 4  # Move to the next month's columns
+
+
+        # **Add the TOTAL Row at the End of Each Campaign-Channel Group**
+
+        col_idx = 1
+
+        sheet.cell(row=row_idx, column=col_idx, value="TOTAL")  # Label for total row
+
+        sheet.cell(row=row_idx, column=col_idx + 1, value=campaign)
+
+        sheet.cell(row=row_idx, column=col_idx + 2, value=channel)
+
+        col_idx += 4  # Move to the monthly data columns
+
+
+
+        # **Calculate the sum of each month's metrics manually**
+
+        start_sum_row = row_idx - len(group_data)
+
+
+
+        for month in months:
+
+            month_col_offset = months.index(month) * 4  # Offset based on month position
+
+
+
+            for metric_idx, metric in enumerate(metric_headers):
+
+                # ✅ Correct summation of all rows above this total row
+
+                total_formula = f"=SUM({get_column_letter(col_idx + metric_idx)}{start_sum_row}:{get_column_letter(col_idx + metric_idx)}{row_idx - 1})"
+
+                sheet.cell(row=row_idx, column=col_idx + metric_idx, value=total_formula)
+
+
+
+            col_idx += 4  # Move to the next set of columns
+
+
+
+        row_idx += 1  # Move to next total row
+
+
+    # Auto-adjust column width
+    for col_num, column_cells in enumerate(sheet.columns, 1):
+        max_length = max((len(str(cell.value)) if cell.value else 0) for cell in column_cells)
+        adjusted_width = max(max_length + 2, 12)
+        sheet.column_dimensions[get_column_letter(col_num)].width = adjusted_width
+
+    # Save and close workbook
+    book.save(filename)
+    book.close()
+    print("✅ 'Monthly Summary' sheet correctly filled with actual values, with totals at the end!")
+
+# Assuming `final_merged_df` contains the relevant data
+filename = "FormattedAnnualBudget.xlsx"
+print(summary_df)
+create_monthly_summary_sheet(filename, monthly_summary)
