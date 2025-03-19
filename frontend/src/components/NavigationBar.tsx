@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ChanelLogo from "@/public/chanel.jpg";
+import { Button } from "./ui/button";
 
 
 const NavigationBar = () => {
@@ -11,18 +12,20 @@ const NavigationBar = () => {
     <nav className="bg-black text-white py-4">
       <div className="container mx-auto flex justify-between items-center">
         {/* Logo and Branding */}
-        <div className="flex items-center">
-          <Image
-            src={ChanelLogo}
-            alt="Chanel Logo"
-            width={50}
-            height={50}
-            className="object-contain mr-4"
-          />
-          <h1 className="text-lg font-bold tracking-wide uppercase">
-            Chanel Dashboard
-          </h1>
-        </div>
+        <Link href="/">
+          <div className="flex items-center">
+            <Image
+              src={ChanelLogo}
+              alt="Chanel Logo"
+              width={50}
+              height={50}
+              className="object-contain mr-4"
+            />
+            <h1 className="text-lg font-bold tracking-wide uppercase">
+              Chanel Dashboard
+            </h1>
+          </div>
+        </Link>
 
         {/* Navigation Links */}
         <div className="space-x-8 text-sm">
