@@ -1,11 +1,9 @@
 "use client";
 
 import React, { ReactNode } from "react";
-import Image from "next/image";
+import { ClerkProvider, RedirectToSignIn, useAuth } from "@clerk/nextjs";
 import NavigationBar from "../components/NavigationBar"; // Adjust the path if necessary
-import ChanelLogo from "@/public/chanel.jpg";
 import "./globals.css";
-import { Button } from "@/components/ui/button";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -38,4 +36,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </body>
     </html>
   );
+}
+
+function ProtectedLayout({ children }: { children: ReactNode }) {
+  const { isSignedIn } = useAuth();
+
+  if (!isSignedIn) {
+    // Redirect to sign-in if the user is not authenticated
+    return <RedirectToSignIn />;
+  }
+
+  return <>{children}</>;
 }
