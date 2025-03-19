@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { uploadFile } from "./actions";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 
 export default function UploadPage() {
@@ -32,10 +35,13 @@ export default function UploadPage() {
   };
 
   return (
-    <div>
+    <div className="space-y-4">
       <h1>Upload File</h1>
-      <input type="file" onChange={handleFileChange} />
-      <button onClick={handleUpload}>Upload</button>
+      <div className="grid w-full max-w-sm items-center gap-1.5">
+        <Label htmlFor="file">XLSX or CSV File</Label>
+        <Input id="file" type="file" onChange={handleFileChange}/>
+      </div>
+      <Button onClick={handleUpload}>Upload</Button>
       <p>{message}</p>
     </div>
   );
