@@ -649,7 +649,6 @@ def create_monthly_summary_sheet(filename, data):
         sheet = book.create_sheet(sheet_name)
         
         
-
         # Set up merged headers for months
         row1 = 1  # Super header row
         row2 = 2  # Subheader row
@@ -674,61 +673,54 @@ def create_monthly_summary_sheet(filename, data):
                 sheet.cell(row=row2, column=col_idx, value=metric).font = Font(bold=True)
                 sheet.cell(row=row2, column=col_idx).alignment = Alignment(horizontal="center", vertical="center")
                 col_idx += 1
-
-        # **Populate Data Correctly (Fixing Repetitions)**
+                
+        # Track positions for "Total" rows so they remain on a single row
+        total_rows = {}  
+        
         row_idx = 3  # Start inserting data from the 3rd row
-        campaign_channel_groups = data.groupby(['Campaign', 'Channel'])
+        
+        for _, row in division_data.iterrows():
+            col_idx = 1  # Reset column index for each row
 
-        # Start inserting data from row 3
-        row_idx = 3  
+            # If "Channel" == "Total", check if this PO_Number + Market already exists
+            if row["Channel"] == "Total":
+                key = (row["PO_Number"], row["Market"])
 
-        # Iterate over each unique Campaign + Channel combination
-        for (campaign, channel), group_data in division_data.groupby(['Campaign', 'Channel']):
-            col_idx = 1
+                if key not in total_rows:
+                    total_rows[key] = row_idx  # Store row index for this PO+Market
+                    sheet.cell(row=row_idx, column=col_idx, value=row['PO_Number'])
+                    sheet.cell(row=row_idx, column=col_idx + 4, value=row['Market'])
+                    sheet.cell(row=row_idx, column=col_idx + 5, value=row['Campaign'])
+                    sheet.cell(row=row_idx, column=col_idx + 6, value=row['Channel'])
+                    row_idx += 1  # Only increment row index when adding a new entry
 
-            row_idx = 3  # Start inserting data from the 3rd row
+                target_row = total_rows[key]  # Get the row index for this PO+Market
 
-            for _, row in division_data.iterrows():
-                col_idx = 1  # Reset column index for each row
-
-                # ensure PO_Number, Campaign, and Channel are written for every row
+            else:
+                target_row = row_idx  # For non-"Total" rows, continue adding new rows
                 sheet.cell(row=row_idx, column=col_idx, value=row['PO_Number'])
                 sheet.cell(row=row_idx, column=col_idx + 4, value=row['Market'])
                 sheet.cell(row=row_idx, column=col_idx + 5, value=row['Campaign'])
                 sheet.cell(row=row_idx, column=col_idx + 6, value=row['Channel'])
+                row_idx += 1  # Move to the next row
 
-                col_idx += 7  # Move to the monthly data columns
+            col_idx += 7  # Move to the monthly data columns
 
-                # Retrieve and correctly assign the row's data based on the Month
-                net_billable = None if pd.isna(row['NetBillable']) else row['NetBillable']
-                agency_commission = None if pd.isna(row['AgencyCommission']) else row['AgencyCommission']
-                levy_asbof = None if pd.isna(row['LevyASBOF']) else row['LevyASBOF']
-                total_invoiced = None if pd.isna(row['Total_Invoice_Val']) else row['Total_Invoice_Val']
-                invoice_no = None if pd.isna(row['InvoiceNo']) else row['InvoiceNo']
+            # Retrieve and correctly assign the row's data based on the Month
+            net_billable = None if pd.isna(row['NetBillable']) else row['NetBillable']
+            agency_commission = None if pd.isna(row['AgencyCommission']) else row['AgencyCommission']
+            levy_asbof = None if pd.isna(row['LevyASBOF']) else row['LevyASBOF']
+            total_invoiced = None if pd.isna(row['Total_Invoice_Val']) else row['Total_Invoice_Val']
+            invoice_no = None if pd.isna(row['InvoiceNo']) else row['InvoiceNo']
 
-
-                # Assign values to the correct month
-                if row['Month'] in months:  # Ensure the Month is valid before indexing
-                    month_col_offset = (months.index(row['Month']) * 5)  # Offset based on month position
-                    sheet.cell(row=row_idx, column=col_idx + month_col_offset, value=net_billable)
-                    sheet.cell(row=row_idx, column=col_idx + month_col_offset + 1, value=agency_commission)
-                    sheet.cell(row=row_idx, column=col_idx + month_col_offset + 2, value=levy_asbof)
-                    sheet.cell(row=row_idx, column=col_idx + month_col_offset + 3, value=total_invoiced)
-
-                sheet.cell(row=row_idx, column=col_idx + month_col_offset, value=net_billable)
-                sheet.cell(row=row_idx, column=col_idx + month_col_offset + 1, value=agency_commission)
-                sheet.cell(row=row_idx, column=col_idx + month_col_offset + 2, value=levy_asbof)
-                sheet.cell(row=row_idx, column=col_idx + month_col_offset + 3, value=total_invoiced)
-                sheet.cell(row=row_idx, column=col_idx + month_col_offset + 4, value=invoice_no)
-
-                row_idx += 1  # Move to the next row for correct alignment
-
-            for month in months:
-                month_col_offset = months.index(month) * 4  # Offset based on month position
-                col_idx += 4  # Move to the next set of columns
-
-            row_idx += 1  # Move to next total row
-
+            # Assign values to the correct month
+            if row['Month'] in months:  # Ensure the Month is valid before indexing
+                month_col_offset = (months.index(row['Month']) * 5)  # Offset based on month position
+                sheet.cell(row=target_row, column=col_idx + month_col_offset, value=net_billable)
+                sheet.cell(row=target_row, column=col_idx + month_col_offset + 1, value=agency_commission)
+                sheet.cell(row=target_row, column=col_idx + month_col_offset + 2, value=levy_asbof)
+                sheet.cell(row=target_row, column=col_idx + month_col_offset + 3, value=total_invoiced)
+                sheet.cell(row=target_row, column=col_idx + month_col_offset + 4, value=invoice_no)
 
         # Auto-adjust column width
         for col_num, column_cells in enumerate(sheet.columns, 1):
@@ -765,4 +757,4 @@ else:
 
 
 # monthly_summary = monthly_summary.reset_index(inplace=False)
-# print(monthly_summary)
+print(monthly_summary)
