@@ -14,7 +14,8 @@ from azure.kusto.ingest import ReportLevel, ReportMethod
 import io
 import pandas as pd
 import tempfile
-from excel_generator import generate_excel_report
+from AdxIngestFunction.excel_generator import generate_excel_report
+from .utils import get_kusto_kcsb  # Relative import indicating current package
 from azure.storage.blob import BlobServiceClient
 
 

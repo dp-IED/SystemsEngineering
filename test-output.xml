@@ -1,0 +1,345 @@
+<test-run id="2" testcasecount="3" result="Passed" start-time="2025-03-23 14:58:10.448278" end-time="2025-03-23 14:58:18.460743" duration="8" total="3" passed="2" failed="1" inconclusive="0" skipped="0" asserts="0" clr-version="3.11.11 (main, Dec  3 2024, 17:20:40) [Clang 16.0.0 (clang-1600.0.26.4)]" engine-version="3.6.2"><command-line>/opt/homebrew/bin/pytest --cov=AdxIngestFunction --cov-report=html:./htmlcov tests/</command-line><filter><test re="0">tests/</test></filter><test-suite id="tests/test_utils.py::TestUtils" name="tests/test_utils.py::TestUtils" fullname="tests/test_utils.py::TestUtils" methodname="" classname="" runstate="Runnable" type="Assembly" testcasecount="1" result="Passed" label="" start-time="2025-03-23 14:58:18.345034" end-time="2025-03-23 14:58:18.346053" duration="0.001019" asserts="0" total="1" passed="1" failed="0" warnings="0" inconclusive="0" skipped="0"><properties><property name="python_version" value="3.11.11 (main, Dec  3 2024, 17:20:40) [Clang 16.0.0 (clang-1600.0.26.4)]" /></properties><test-case id="102" name="tests/test_utils.py::TestUtils::test_get_kusto_kcsb" fullname="tests/test_utils.py::TestUtils::test_get_kusto_kcsb" methodname="test_get_kusto_kcsb" classname="TestUtils" runstate="Runnable" seed="1" result="Passed" label="" start-time="2025-03-23 14:58:18.345034" end-time="2025-03-23 14:58:18.346053" duration="0.001019" asserts="0"><properties><property name="python-version" value="3.11.11 (main, Dec  3 2024, 17:20:40) [Clang 16.0.0 (clang-1600.0.26.4)]" /><property name="fspath" value="tests/test_utils.py" /></properties><environment framework-version="3.6.2" clr-version="3.11.11 (main, Dec  3 2024, 17:20:40) [Clang 16.0.0 (clang-1600.0.26.4)]" os-version="23.1.0" platform="Darwin" cwd="/Users/mac/Documents/SystemsEngineering-2" machine-name="arm64" user="" user-domain="" culture="en_US" uiculture="en_US" os-architecture="64bit" /><failure><message><![CDATA[]]></message><stack-trace><![CDATA[None]]></stack-trace></failure><reason><message><![CDATA[]]></message></reason><output><![CDATA[]]></output></test-case><environment framework-version="3.6.2" clr-version="3.11.11 (main, Dec  3 2024, 17:20:40) [Clang 16.0.0 (clang-1600.0.26.4)]" os-version="23.1.0" platform="Darwin" cwd="/Users/mac/Documents/SystemsEngineering-2" machine-name="arm64" user="" user-domain="" culture="en_US" uiculture="en_US" os-architecture="64bit" /></test-suite><test-suite id="tests/test_excel_generator.py::TestExcelGenerator" name="tests/test_excel_generator.py::TestExcelGenerator" fullname="tests/test_excel_generator.py::TestExcelGenerator" methodname="" classname="" runstate="Runnable" type="Assembly" testcasecount="1" result="Passed" label="" start-time="2025-03-23 14:58:13.094594" end-time="2025-03-23 14:58:18.344475" duration="5.249881" asserts="0" total="1" passed="1" failed="0" warnings="0" inconclusive="0" skipped="0"><properties><property name="python_version" value="3.11.11 (main, Dec  3 2024, 17:20:40) [Clang 16.0.0 (clang-1600.0.26.4)]" /></properties><test-case id="101" name="tests/test_excel_generator.py::TestExcelGenerator::test_save_dataframe_to_excel_and_formatting" fullname="tests/test_excel_generator.py::TestExcelGenerator::test_save_dataframe_to_excel_and_formatting" methodname="test_save_dataframe_to_excel_and_formatting" classname="TestExcelGenerator" runstate="Runnable" seed="1" result="Passed" label="" start-time="2025-03-23 14:58:13.094594" end-time="2025-03-23 14:58:18.344475" duration="5.249881" asserts="0"><properties><property name="python-version" value="3.11.11 (main, Dec  3 2024, 17:20:40) [Clang 16.0.0 (clang-1600.0.26.4)]" /><property name="fspath" value="tests/test_excel_generator.py" /></properties><environment framework-version="3.6.2" clr-version="3.11.11 (main, Dec  3 2024, 17:20:40) [Clang 16.0.0 (clang-1600.0.26.4)]" os-version="23.1.0" platform="Darwin" cwd="/Users/mac/Documents/SystemsEngineering-2" machine-name="arm64" user="" user-domain="" culture="en_US" uiculture="en_US" os-architecture="64bit" /><failure><message><![CDATA[]]></message><stack-trace><![CDATA[None]]></stack-trace></failure><reason><message><![CDATA[]]></message></reason><output><![CDATA[]]></output></test-case><environment framework-version="3.6.2" clr-version="3.11.11 (main, Dec  3 2024, 17:20:40) [Clang 16.0.0 (clang-1600.0.26.4)]" os-version="23.1.0" platform="Darwin" cwd="/Users/mac/Documents/SystemsEngineering-2" machine-name="arm64" user="" user-domain="" culture="en_US" uiculture="en_US" os-architecture="64bit" /></test-suite><test-suite id="tests/test_adx_ingest_function.py::TestBlobIngestFunction" name="tests/test_adx_ingest_function.py::TestBlobIngestFunction" fullname="tests/test_adx_ingest_function.py::TestBlobIngestFunction" methodname="" classname="" runstate="Runnable" type="Assembly" testcasecount="1" result="Passed" label="" start-time="2025-03-23 14:58:11.546358" end-time="2025-03-23 14:58:13.094042" duration="1.547684" asserts="0" total="1" passed="0" failed="1" warnings="0" inconclusive="0" skipped="0"><properties><property name="python_version" value="3.11.11 (main, Dec  3 2024, 17:20:40) [Clang 16.0.0 (clang-1600.0.26.4)]" /></properties><test-case id="100" name="tests/test_adx_ingest_function.py::TestBlobIngestFunction::test_upload_blob_called" fullname="tests/test_adx_ingest_function.py::TestBlobIngestFunction::test_upload_blob_called" methodname="test_upload_blob_called" classname="TestBlobIngestFunction" runstate="Runnable" seed="1" result="Failed" label="" start-time="2025-03-23 14:58:11.546358" end-time="2025-03-23 14:58:13.094042" duration="1.547684" asserts="0"><properties><property name="python-version" value="3.11.11 (main, Dec  3 2024, 17:20:40) [Clang 16.0.0 (clang-1600.0.26.4)]" /><property name="fspath" value="tests/test_adx_ingest_function.py" /></properties><environment framework-version="3.6.2" clr-version="3.11.11 (main, Dec  3 2024, 17:20:40) [Clang 16.0.0 (clang-1600.0.26.4)]" os-version="23.1.0" platform="Darwin" cwd="/Users/mac/Documents/SystemsEngineering-2" machine-name="arm64" user="" user-domain="" culture="en_US" uiculture="en_US" os-architecture="64bit" /><failure><message><![CDATA[self = &lt;tests.test_adx_ingest_function.TestBlobIngestFunction testMethod=test_upload_blob_called&gt;
+mock_generate_excel_report = &lt;MagicMock name='generate_excel_report' id='4556736784'&gt;
+mock_blob_service_client = &lt;MagicMock name='BlobServiceClient' id='4556857168'&gt;
+mock_blob_client_from_url = &lt;MagicMock name='from_blob_url' id='4563139280'&gt;
+mock_ingest_client = &lt;MagicMock name='QueuedIngestClient' id='4441788752'&gt;
+mock_default_cred = &lt;MagicMock name='DefaultAzureCredential' id='4563134480'&gt;
+
+    @patch('azure.identity.DefaultAzureCredential')
+    @patch('azure.kusto.ingest.QueuedIngestClient')
+    @patch('azure.storage.blob.BlobClient.from_blob_url')
+    @patch('azure.storage.blob.BlobServiceClient')
+    @patch('AdxIngestFunction.function_app.generate_excel_report')
+    @patch.dict('os.environ', {
+        'ADX_CLUSTER_URI': 'https://mock.kusto.windows.net',
+        'ADX_DATABASE': 'mock_database',
+        'AzureWebJobsStorage': 'UseDevelopmentStorage=true'
+    })
+    def test_upload_blob_called(
+        self,
+        mock_generate_excel_report,
+        mock_blob_service_client,
+        mock_blob_client_from_url,
+        mock_ingest_client,
+        mock_default_cred,
+    ):
+        # Arrange blob download
+        mock_blob_client = MagicMock()
+        mock_blob_client.download_blob.return_value.readall.return_value = b"col1,col2\n1,2\n3,4"
+        mock_blob_client_from_url.return_value = mock_blob_client
+    
+        # Mock ADX client
+        mock_ingest_instance = MagicMock()
+        mock_ingest_client.return_value = mock_ingest_instance
+    
+        # Mock token
+        mock_cred_instance = MagicMock()
+        mock_default_cred.return_value = mock_cred_instance
+        mock_cred_instance.get_token.return_value.token = "fake_token"
+    
+        # Mock upload_blob
+        mock_container_client = MagicMock()
+        mock_container_client.upload_blob = MagicMock()
+        mock_blob_service_instance = MagicMock()
+        mock_blob_service_instance.get_container_client.return_value = mock_container_client
+        mock_blob_service_client.return_value = mock_blob_service_instance
+    
+        # Patch Excel generation to write dummy file
+        def dummy_generate_excel_report(filepath):
+            with open(filepath, "wb") as f:
+                f.write(b"dummy excel")
+        mock_generate_excel_report.side_effect = dummy_generate_excel_report
+    
+        # Simulate blob trigger input
+        myblob = MagicMock(spec=func.InputStream)
+        myblob.name = "test_blob.csv"
+    
+        # Act
+        blob_ingest_function(myblob)
+    
+        # ✅ Assert upload_blob called
+&gt;       mock_container_client.upload_blob.assert_called_once()
+
+tests/test_adx_ingest_function.py:62: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;MagicMock name='BlobServiceClient().get_container_client().upload_blob' id='4556721296'&gt;
+
+    def assert_called_once(self):
+        """assert that the mock was called only once.
+        """
+        if not self.call_count == 1:
+            msg = ("Expected '%s' to have been called once. Called %s times.%s"
+                   % (self._mock_name or 'mock',
+                      self.call_count,
+                      self._calls_repr()))
+&gt;           raise AssertionError(msg)
+E           AssertionError: Expected 'upload_blob' to have been called once. Called 0 times.
+
+/opt/homebrew/Cellar/python@3.11/3.11.11/Frameworks/Python.framework/Versions/3.11/lib/python3.11/unittest/mock.py:918: AssertionError]]></message><stack-trace><![CDATA[/opt/homebrew/Cellar/python@3.11/3.11.11/Frameworks/Python.framework/Versions/3.11/lib/python3.11/unittest/mock.py:918: AssertionError: Expected 'upload_blob' to have been called once. Called 0 times.]]></stack-trace></failure><reason><message><![CDATA[&#x1b;[1m&#x1b;[31mERROR   &#x1b;[0m root:function_app.py:86 ERROR during ingestion: Failed to process network request for the endpoint: https://ingest-mock.kusto.windows.net/v1/rest/mgmt
+Traceback (most recent call last):
+  File "/opt/homebrew/lib/python3.11/site-packages/urllib3/connection.py", line 199, in _new_conn
+    sock = connection.create_connection(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/urllib3/util/connection.py", line 60, in create_connection
+    for res in socket.getaddrinfo(host, port, family, socket.SOCK_STREAM):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.11/Frameworks/Python.framework/Versions/3.11/lib/python3.11/socket.py", line 974, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 8] nodename nor servname provided, or not known
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/homebrew/lib/python3.11/site-packages/urllib3/connectionpool.py", line 789, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/urllib3/connectionpool.py", line 490, in _make_request
+    raise new_e
+  File "/opt/homebrew/lib/python3.11/site-packages/urllib3/connectionpool.py", line 466, in _make_request
+    self._validate_conn(conn)
+  File "/opt/homebrew/lib/python3.11/site-packages/urllib3/connectionpool.py", line 1095, in _validate_conn
+    conn.connect()
+  File "/opt/homebrew/lib/python3.11/site-packages/urllib3/connection.py", line 693, in connect
+    self.sock = sock = self._new_conn()
+                       ^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/urllib3/connection.py", line 206, in _new_conn
+    raise NameResolutionError(self.host, self, e) from e
+urllib3.exceptions.NameResolutionError: &lt;urllib3.connection.HTTPSConnection object at 0x128066090&gt;: Failed to resolve 'ingest-mock.kusto.windows.net' ([Errno 8] nodename nor servname provided, or not known)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/homebrew/lib/python3.11/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/urllib3/connectionpool.py", line 843, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/urllib3/util/retry.py", line 519, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='ingest-mock.kusto.windows.net', port=443): Max retries exceeded with url: /v1/rest/mgmt (Caused by NameResolutionError("&lt;urllib3.connection.HTTPSConnection object at 0x128066090&gt;: Failed to resolve 'ingest-mock.kusto.windows.net' ([Errno 8] nodename nor servname provided, or not known)"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/data/client.py", line 337, in _execute
+    response = MonitoredActivity.invoke(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/data/_telemetry.py", line 116, in invoke
+    return span()
+           ^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/core/tracing/decorator.py", line 105, in wrapper_use_tracer
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/data/client.py", line 326, in &lt;lambda&gt;
+    invoker = lambda: self._session.post(
+                      ^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/requests/sessions.py", line 637, in post
+    return self.request("POST", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/requests/adapters.py", line 700, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='ingest-mock.kusto.windows.net', port=443): Max retries exceeded with url: /v1/rest/mgmt (Caused by NameResolutionError("&lt;urllib3.connection.HTTPSConnection object at 0x128066090&gt;: Failed to resolve 'ingest-mock.kusto.windows.net' ([Errno 8] nodename nor servname provided, or not known)"))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/mac/Documents/SystemsEngineering-2/AdxIngestFunction/function_app.py", line 64, in blob_ingest_function
+    ingest_client.ingest_from_blob(descriptor, ingestion_properties=ingestion_props)
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/core/tracing/decorator.py", line 105, in wrapper_use_tracer
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/ingest/ingest_client.py", line 133, in ingest_from_blob
+    queues = self._resource_manager.get_ingestion_queues()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/ingest/_resource_manager.py", line 183, in get_ingestion_queues
+    self._refresh_ingest_client_resources()
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/ingest/_resource_manager.py", line 91, in _refresh_ingest_client_resources
+    self._ingest_client_resources = self._get_ingest_client_resources_from_service()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/ingest/_resource_manager.py", line 107, in _get_ingest_client_resources_from_service
+    result = self._retryer(invoker)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/tenacity/__init__.py", line 475, in __call__
+    do = self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/tenacity/__init__.py", line 376, in iter
+    result = action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/tenacity/__init__.py", line 398, in &lt;lambda&gt;
+    self._add_action_func(lambda rs: rs.outcome.result())
+                                     ^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.11/Frameworks/Python.framework/Versions/3.11/lib/python3.11/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.11/Frameworks/Python.framework/Versions/3.11/lib/python3.11/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/homebrew/lib/python3.11/site-packages/tenacity/__init__.py", line 478, in __call__
+    result = fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/ingest/_resource_manager.py", line 101, in invoker
+    return MonitoredActivity.invoke(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/data/_telemetry.py", line 116, in invoke
+    return span()
+           ^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/core/tracing/decorator.py", line 105, in wrapper_use_tracer
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/ingest/_resource_manager.py", line 102, in &lt;lambda&gt;
+    lambda: self._kusto_client.execute("NetDefaultDB", ".get ingestion resources"),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/data/client.py", line 163, in execute
+    return self.execute_mgmt(database, query, properties)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/core/tracing/decorator.py", line 105, in wrapper_use_tracer
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/data/client.py", line 214, in execute_mgmt
+    return self._execute(self._mgmt_endpoint, request, properties)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/data/client.py", line 341, in _execute
+    raise KustoNetworkError(endpoint, None if properties is None else properties.client_request_id) from e
+azure.kusto.data.exceptions.KustoNetworkError: Failed to process network request for the endpoint: https://ingest-mock.kusto.windows.net/v1/rest/mgmt]]></message></reason><output><![CDATA[&#x1b;[1m&#x1b;[31mERROR   &#x1b;[0m root:function_app.py:86 ERROR during ingestion: Failed to process network request for the endpoint: https://ingest-mock.kusto.windows.net/v1/rest/mgmt
+Traceback (most recent call last):
+  File "/opt/homebrew/lib/python3.11/site-packages/urllib3/connection.py", line 199, in _new_conn
+    sock = connection.create_connection(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/urllib3/util/connection.py", line 60, in create_connection
+    for res in socket.getaddrinfo(host, port, family, socket.SOCK_STREAM):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.11/Frameworks/Python.framework/Versions/3.11/lib/python3.11/socket.py", line 974, in getaddrinfo
+    for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+socket.gaierror: [Errno 8] nodename nor servname provided, or not known
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/homebrew/lib/python3.11/site-packages/urllib3/connectionpool.py", line 789, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/urllib3/connectionpool.py", line 490, in _make_request
+    raise new_e
+  File "/opt/homebrew/lib/python3.11/site-packages/urllib3/connectionpool.py", line 466, in _make_request
+    self._validate_conn(conn)
+  File "/opt/homebrew/lib/python3.11/site-packages/urllib3/connectionpool.py", line 1095, in _validate_conn
+    conn.connect()
+  File "/opt/homebrew/lib/python3.11/site-packages/urllib3/connection.py", line 693, in connect
+    self.sock = sock = self._new_conn()
+                       ^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/urllib3/connection.py", line 206, in _new_conn
+    raise NameResolutionError(self.host, self, e) from e
+urllib3.exceptions.NameResolutionError: &lt;urllib3.connection.HTTPSConnection object at 0x128066090&gt;: Failed to resolve 'ingest-mock.kusto.windows.net' ([Errno 8] nodename nor servname provided, or not known)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/opt/homebrew/lib/python3.11/site-packages/requests/adapters.py", line 667, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/urllib3/connectionpool.py", line 843, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/urllib3/util/retry.py", line 519, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='ingest-mock.kusto.windows.net', port=443): Max retries exceeded with url: /v1/rest/mgmt (Caused by NameResolutionError("&lt;urllib3.connection.HTTPSConnection object at 0x128066090&gt;: Failed to resolve 'ingest-mock.kusto.windows.net' ([Errno 8] nodename nor servname provided, or not known)"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/data/client.py", line 337, in _execute
+    response = MonitoredActivity.invoke(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/data/_telemetry.py", line 116, in invoke
+    return span()
+           ^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/core/tracing/decorator.py", line 105, in wrapper_use_tracer
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/data/client.py", line 326, in &lt;lambda&gt;
+    invoker = lambda: self._session.post(
+                      ^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/requests/sessions.py", line 637, in post
+    return self.request("POST", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/requests/adapters.py", line 700, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPSConnectionPool(host='ingest-mock.kusto.windows.net', port=443): Max retries exceeded with url: /v1/rest/mgmt (Caused by NameResolutionError("&lt;urllib3.connection.HTTPSConnection object at 0x128066090&gt;: Failed to resolve 'ingest-mock.kusto.windows.net' ([Errno 8] nodename nor servname provided, or not known)"))
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/mac/Documents/SystemsEngineering-2/AdxIngestFunction/function_app.py", line 64, in blob_ingest_function
+    ingest_client.ingest_from_blob(descriptor, ingestion_properties=ingestion_props)
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/core/tracing/decorator.py", line 105, in wrapper_use_tracer
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/ingest/ingest_client.py", line 133, in ingest_from_blob
+    queues = self._resource_manager.get_ingestion_queues()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/ingest/_resource_manager.py", line 183, in get_ingestion_queues
+    self._refresh_ingest_client_resources()
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/ingest/_resource_manager.py", line 91, in _refresh_ingest_client_resources
+    self._ingest_client_resources = self._get_ingest_client_resources_from_service()
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/ingest/_resource_manager.py", line 107, in _get_ingest_client_resources_from_service
+    result = self._retryer(invoker)
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/tenacity/__init__.py", line 475, in __call__
+    do = self.iter(retry_state=retry_state)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/tenacity/__init__.py", line 376, in iter
+    result = action(retry_state)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/tenacity/__init__.py", line 398, in &lt;lambda&gt;
+    self._add_action_func(lambda rs: rs.outcome.result())
+                                     ^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.11/Frameworks/Python.framework/Versions/3.11/lib/python3.11/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.11/Frameworks/Python.framework/Versions/3.11/lib/python3.11/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/opt/homebrew/lib/python3.11/site-packages/tenacity/__init__.py", line 478, in __call__
+    result = fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/ingest/_resource_manager.py", line 101, in invoker
+    return MonitoredActivity.invoke(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/data/_telemetry.py", line 116, in invoke
+    return span()
+           ^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/core/tracing/decorator.py", line 105, in wrapper_use_tracer
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/ingest/_resource_manager.py", line 102, in &lt;lambda&gt;
+    lambda: self._kusto_client.execute("NetDefaultDB", ".get ingestion resources"),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/data/client.py", line 163, in execute
+    return self.execute_mgmt(database, query, properties)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/core/tracing/decorator.py", line 105, in wrapper_use_tracer
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/data/client.py", line 214, in execute_mgmt
+    return self._execute(self._mgmt_endpoint, request, properties)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/lib/python3.11/site-packages/azure/kusto/data/client.py", line 341, in _execute
+    raise KustoNetworkError(endpoint, None if properties is None else properties.client_request_id) from e
+azure.kusto.data.exceptions.KustoNetworkError: Failed to process network request for the endpoint: https://ingest-mock.kusto.windows.net/v1/rest/mgmt]]></output></test-case><environment framework-version="3.6.2" clr-version="3.11.11 (main, Dec  3 2024, 17:20:40) [Clang 16.0.0 (clang-1600.0.26.4)]" os-version="23.1.0" platform="Darwin" cwd="/Users/mac/Documents/SystemsEngineering-2" machine-name="arm64" user="" user-domain="" culture="en_US" uiculture="en_US" os-architecture="64bit" /></test-suite></test-run>

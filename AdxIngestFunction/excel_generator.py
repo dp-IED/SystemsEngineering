@@ -11,7 +11,7 @@ from azure.kusto.ingest import QueuedIngestClient, IngestionProperties
 from azure.kusto.ingest.ingestion_properties import ReportLevel
 import tempfile
 from azure.identity import DefaultAzureCredential
-from utils import get_kusto_kcsb  # At the top of excel_generator.py
+from .utils import get_kusto_kcsb
 
 
 

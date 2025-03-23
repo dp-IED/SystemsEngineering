@@ -69,6 +69,7 @@ def set_column_width(sheet, start_col, headers, months):
 def fill_colours(filename):
     wb = load_workbook(filename)
     # Define fill colours
+    header_font = Font(bold=True, color="00FFFFFF")  # White header text
     closedown_fill = PatternFill(start_color="E0DCDC", end_color="E0DCDC", fill_type="solid") # POCloseDownDate fill
     remainingpo_fill = PatternFill(start_color="E0ECF4", end_color="E0ECF4", fill_type="solid") # POValueRemaining fill
     date_fill = PatternFill(start_color="F8F4F4", end_color="F8F4F4", fill_type="solid") # date columns fill
@@ -76,9 +77,10 @@ def fill_colours(filename):
     product_fill = PatternFill(start_color="FCE4D6", end_color="FCE4D6", fill_type="solid")  # Light pink for product-related columns
     invoice_fill = PatternFill(start_color="C8E4B4", end_color="C8E4B4", fill_type="solid")  # Light green for TotalInvoiceVal column
     total_row_fill = PatternFill(start_color="BFBFBF", end_color="BFBFBF", fill_type="solid")  # Gray for total rows
+    header_font = Font(bold=True, color="00FFFFFF")  # White header text
     header_fill = PatternFill(start_color="48546C", end_color="48546C", fill_type="solid")  # Header background
     header_font = Font(bold=True, color="00FFFFFF")  # White header text
-    
+
     # Columns to format
     product_columns = ["ProductCode", "PlannedSpend", "ReservedBudget", "TotalBudget", "NetBillable", "AgencyCommission", "LevyASBOF", "TotalPOValue"]
     date_columns = ["StartDate", "EndDate"]
@@ -91,7 +93,7 @@ def fill_colours(filename):
         for cell in ws[1]:  # Iterate over header row
             cell.fill = header_fill
             cell.font = header_font
-        
+
         # Get column indices dynamically
         # column_indices = {cell.value: cell.column for cell in ws[1] if cell.value}
         
@@ -134,7 +136,7 @@ def fill_colours(filename):
                 if total_row:
                     for cell in row:
                         cell.fill = total_row_fill
-                        
+             
     format_workbook(wb)
     wb.save(filename)
     
@@ -714,24 +716,7 @@ def create_monthly_summary_sheet(filename, data):
             row_idx += 1  # Move to the next row for correct alignment
 
 
-        # Process each month
-        for month in months:
-            month_data = group_data[group_data['Month'] == month].reset_index(drop=True)
-
-            # Iterate over the rows of month_data to correctly insert values
-            for _, month_row in month_data.iterrows():
-                net_billable = None if pd.isna(month_row['NetBillable']) else month_row['NetBillable']
-                agency_commission = None if pd.isna(month_row['AgencyCommission']) else month_row['AgencyCommission']
-                levy_asbof = None if pd.isna(month_row['LevyASBOF']) else month_row['LevyASBOF']
-                total_invoiced = None if pd.isna(month_row['Total_Invoice_Val']) else month_row['Total_Invoice_Val']
-
-                # Insert each row's values correctly instead of just the first row repeatedly
-                sheet.cell(row=row_idx, column=col_idx, value=net_billable)
-                sheet.cell(row=row_idx, column=col_idx + 1, value=agency_commission)
-                sheet.cell(row=row_idx, column=col_idx + 2, value=levy_asbof)
-                sheet.cell(row=row_idx, column=col_idx + 3, value=total_invoiced)
-
-                row_idx += 1  # Move to the next row for correct alignment
+        
         
             col_idx += 4  # Move to the next month's columns
             
