@@ -1,7 +1,0 @@
-azure-functions
-azure-identity
-azure-storage-blob
-azure-kusto-data
-azure-kusto-ingest
-pandas
-openpyxl

@@ -1,6 +1,6 @@
 import azure.functions as func
 import logging
-from convert import process_billed, process_annual_budget_sheet, process_budget_tracker
+from convert import process_billed, process_budget_tracker
 from azure.storage.blob import BlobServiceClient
 
 # Azure Blob Storage connection
@@ -19,8 +19,6 @@ def BlobTriggerFunction(myblob: func.InputStream):
     # Call `convert.py` functions
     if "Chanel UK Billed.xlsx" in myblob.name:
         process_billed(myblob.name, blob_service_client)
-    elif "Annual Budget Sheet.xlsx" in myblob.name and "Budget" in myblob.name:
-        process_annual_budget_sheet(myblob.name, blob_service_client)
     elif "Budget Tracker.xlsx" in myblob.name:
         process_budget_tracker(myblob.name, blob_service_client)
     

@@ -1,0 +1,148 @@
+{
+    "machine_info": {
+        "node": "eduroam-int-dhcp-97-219-18.ucl.ac.uk",
+        "processor": "arm",
+        "machine": "arm64",
+        "python_compiler": "Clang 15.0.0 (clang-1500.0.40.1)",
+        "python_implementation": "CPython",
+        "python_implementation_version": "3.9.16",
+        "python_version": "3.9.16",
+        "python_build": [
+            "main",
+            "Nov 24 2024 12:27:18"
+        ],
+        "release": "23.0.0",
+        "system": "Darwin",
+        "cpu": {
+            "python_version": "3.9.16.final.0 (64 bit)",
+            "cpuinfo_version": [
+                9,
+                0,
+                0
+            ],
+            "cpuinfo_version_string": "9.0.0",
+            "arch": "ARM_8",
+            "bits": 64,
+            "count": 8,
+            "arch_string_raw": "arm64",
+            "brand_raw": "Apple M2"
+        }
+    },
+    "commit_info": {
+        "id": "fd76cf7ec7af217280083dd58b275f931311e95b",
+        "time": "2025-03-24T15:24:00Z",
+        "author_time": "2025-03-24T15:24:00Z",
+        "dirty": true,
+        "project": "SystemsEngineering",
+        "branch": "backend-testing"
+    },
+    "benchmarks": [
+        {
+            "group": null,
+            "name": "test_process_billed_performance",
+            "fullname": "tests/test_speed.py::test_process_billed_performance",
+            "params": null,
+            "param": null,
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.017499666000000857,
+                "max": 0.018942833000000547,
+                "mean": 0.01800311983333332,
+                "stddev": 0.0002737094864103696,
+                "rounds": 48,
+                "median": 0.01792210400000016,
+                "iqr": 0.0003510204999992439,
+                "q1": 0.017820792000000196,
+                "q3": 0.01817181249999944,
+                "iqr_outliers": 1,
+                "stddev_outliers": 11,
+                "outliers": "11;1",
+                "ld15iqr": 0.017499666000000857,
+                "hd15iqr": 0.018942833000000547,
+                "ops": 55.545928108997515,
+                "total": 0.8641497519999994,
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_process_budget_tracker_performance",
+            "fullname": "tests/test_speed.py::test_process_budget_tracker_performance",
+            "params": null,
+            "param": null,
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.006569792000000518,
+                "max": 0.007091582999999346,
+                "mean": 0.006709014352112742,
+                "stddev": 0.00010143337911735637,
+                "rounds": 142,
+                "median": 0.006683542000000209,
+                "iqr": 7.408299999944745e-05,
+                "q1": 0.006649582999999737,
+                "q3": 0.006723665999999184,
+                "iqr_outliers": 13,
+                "stddev_outliers": 21,
+                "outliers": "21;13",
+                "ld15iqr": 0.006569792000000518,
+                "hd15iqr": 0.006862124999999608,
+                "ops": 149.0531913506921,
+                "total": 0.9526800380000093,
+                "iterations": 1
+            }
+        },
+        {
+            "group": null,
+            "name": "test_blob_ingest_function_performance",
+            "fullname": "tests/test_speed.py::test_blob_ingest_function_performance",
+            "params": null,
+            "param": null,
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.0001140829999997095,
+                "max": 0.0006298329999996355,
+                "mean": 0.00012955976334776486,
+                "stddev": 4.0959609869798704e-05,
+                "rounds": 693,
+                "median": 0.00012129199999932894,
+                "iqr": 6.218249998912739e-06,
+                "q1": 0.00011916700000069724,
+                "q3": 0.00012538524999960998,
+                "iqr_outliers": 106,
+                "stddev_outliers": 15,
+                "outliers": "15;106",
+                "ld15iqr": 0.0001140829999997095,
+                "hd15iqr": 0.00013491700000045626,
+                "ops": 7718.445713086059,
+                "total": 0.08978491600000105,
+                "iterations": 1
+            }
+        }
+    ],
+    "datetime": "2025-03-24T19:12:36.165249+00:00",
+    "version": "5.1.0"
+}
