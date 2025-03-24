@@ -5,11 +5,13 @@ import { uploadFile } from "./actions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 
 
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [message, setMessage] = useState("");
+  const {toast} = useToast();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files?.length) {
@@ -28,9 +30,16 @@ export default function UploadPage() {
 
     const response = await uploadFile(formData);
     if (response.success) {
-      setMessage(`File uploaded: ${response.url}`);
+      toast({
+          title: "File Uploaded. Please wait a few minutes for the system to generate the spreadsheets.",
+          description: `File URL: ${response.url}`
+        })
     } else {
-      setMessage(`Upload failed: ${response.error}`);
+      toast({
+          variant: "destructive",
+          title: "Error while uploading file",
+          description: response.error
+      })
     }
   };
 

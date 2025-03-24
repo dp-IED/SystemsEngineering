@@ -4,7 +4,6 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ChanelLogo from "@/public/chanel.jpg";
-import { Button } from "./ui/button";
 
 
 const NavigationBar = () => {
@@ -31,6 +30,9 @@ const NavigationBar = () => {
         <div className="space-x-8 text-sm">
           <Link href="/" className="hover:underline">
             Home
+          </Link>
+          <Link href="/upload" className="hover:underline">
+            Upload
           </Link>
           <Link href="/about" className="hover:underline">
             About

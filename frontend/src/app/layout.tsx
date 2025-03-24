@@ -1,9 +1,9 @@
 "use client";
 
 import React, { ReactNode } from "react";
-import { ClerkProvider, RedirectToSignIn, useAuth } from "@clerk/nextjs";
 import NavigationBar from "../components/NavigationBar"; // Adjust the path if necessary
 import "./globals.css";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -28,7 +28,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
         {/* Main Content */}
         <main className="container mx-auto py-6 px-4 flex-grow">{children}</main>
-
+        <Toaster/>  
         {/* Footer */}
         <footer className="mt-4 p-4 bg-slate-900 text-white text-center sticky bottom-0 w-full">
           © 2024 Chanel. All rights reserved.
@@ -36,15 +36,4 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </body>
     </html>
   );
-}
-
-function ProtectedLayout({ children }: { children: ReactNode }) {
-  const { isSignedIn } = useAuth();
-
-  if (!isSignedIn) {
-    // Redirect to sign-in if the user is not authenticated
-    return <RedirectToSignIn />;
-  }
-
-  return <>{children}</>;
 }

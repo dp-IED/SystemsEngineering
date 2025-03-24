@@ -8,7 +8,7 @@ export async function uploadFile(formData: FormData) {
     return { error: "No file selected" };
   }
 
-  const AZURE_STORAGE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING || "";
+  const AZURE_STORAGE_CONNECTION_STRING = process.env.NEXT_PUBLIC_AZURE_STORAGE_CONNECTION_STRING || "";
   if (!AZURE_STORAGE_CONNECTION_STRING) {
     return { error: "Azure Storage connection string is missing" };
   }
@@ -25,3 +25,5 @@ export async function uploadFile(formData: FormData) {
 
   return { success: true, url: blockBlobClient.url };
 }
+
+// TODO: ADD LISTING OF EXISTING UPLOADED DOCUMENTS WITH DATETIME UPLOADED

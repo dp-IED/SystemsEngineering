@@ -49,7 +49,6 @@ export function BudgetvsActualChart(props: BarChartProps) {
     }))
     .sort((a, b) => b.budget - a.budget) // Sort by budget size (descending)
     .slice(0, 10); // Limit to top 10 campaigns for readability
-  
   // Calculate totals for the title
   const totalActual = chartData.reduce((sum, campaign) => sum + campaign.financials.invoiceVal, 0);
   const totalBudget = chartData.reduce((sum, campaign) => sum + campaign.financials.totalBudget, 0);

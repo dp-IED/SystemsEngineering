@@ -136,10 +136,11 @@ const BudgetTable: React.FC<BudgetTableProps> = ({ data, isLoading }) => {
               <TableCell>{row.financials.plannedSpend}</TableCell>
               <TableCell>{row.financials.reservedBudget}</TableCell>
               <TableCell>{row.financials.totalBudget}</TableCell>
-              <TableCell>{row.financials.chanelBudget}</TableCell>
+              {/*// TODO: FIX
+              // 
+              // <TableCell>{row.financials.chanelBudget}</TableCell> 
+              // */}
               <TableCell>{row.market}</TableCell>
-              {/* Monthly data cells would go here if you had them */}
-              {/* For now, I'm leaving them out since they don't appear in your data model */}
             </TableRow>
           ))}
         </TableBody>
