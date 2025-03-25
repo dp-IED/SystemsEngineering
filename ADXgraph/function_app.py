@@ -9,7 +9,9 @@ import logging
 
 from utils import get_kusto_kcsb
 
-app = func.FunctionApp(http_auth_level=func.AuthLevel.ADMIN)
+
+app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
+
 
 @app.route(route="adxGraph")
 def adxGraph(req: func.HttpRequest) -> func.HttpResponse:
