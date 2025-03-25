@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Campaign } from "./page";
+import { Campaign } from "./parseExcelData";
 
 interface BudgetTableProps {
   data: Campaign[];

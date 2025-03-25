@@ -5,8 +5,10 @@ import { Pie, PieChart, Cell, Legend } from "recharts"
 import { ChartContainer, ChartTooltipContent, ChartTooltip, ChartConfig } from "@/components/ui/chart"
 import { Card, CardContent } from "../ui/card"
 import { Label } from "../ui/label"
-import { Campaign } from "../dashboard/page"
+import { Campaign } from "../dashboard/parseExcelData"
 
+
+//TODO: add filtering
 type ChartType = "Campaign" | "Market" | "Division" | "Channel" | "Month"
 
 type BarChartProps = {
@@ -15,6 +17,8 @@ type BarChartProps = {
 
 export function OverallSpendingChart(props: BarChartProps) {
   const {chartData} = props;
+
+  console.log(chartData)
 
 
   // Define chart colors
@@ -35,7 +39,8 @@ export function OverallSpendingChart(props: BarChartProps) {
     campaign: campaign.name, 
     spending: campaign.financials.invoiceVal 
   }))
-  .filter(item => item.spending > 0); // Only keep items with value greater than 0
+
+  console.log(filteredData)
   
   // Dynamically generate chartConfig based on filteredData
   const dynamicChartConfig: ChartConfig = {

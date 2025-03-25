@@ -8,15 +8,20 @@ export async function uploadFile(formData: FormData) {
     return { error: "No file selected" };
   }
 
-  const AZURE_STORAGE_CONNECTION_STRING = process.env.NEXT_PUBLIC_AZURE_STORAGE_CONNECTION_STRING || "";
+  const AZURE_STORAGE_CONNECTION_STRING =
+    process.env.NEXT_PUBLIC_AZURE_STORAGE_CONNECTION_STRING || "";
   if (!AZURE_STORAGE_CONNECTION_STRING) {
     return { error: "Azure Storage connection string is missing" };
   }
 
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
-  const blobServiceClient = BlobServiceClient.fromConnectionString(AZURE_STORAGE_CONNECTION_STRING);
-  const containerClient = blobServiceClient.getContainerClient("subcontractor-documents");
+  const blobServiceClient = BlobServiceClient.fromConnectionString(
+    AZURE_STORAGE_CONNECTION_STRING,
+  );
+  const containerClient = blobServiceClient.getContainerClient(
+    "subcontractor-documents",
+  );
 
   const blobName = file.name;
   const blockBlobClient = containerClient.getBlockBlobClient(blobName);

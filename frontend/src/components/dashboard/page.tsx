@@ -9,36 +9,14 @@ import { OverallSpendingChart } from "@/components/charts/OverallSpendingChart";
 import { BudgetvsActualChart } from "../charts/BudgetvsActualChart";
 import BudgetTable from "./BudgetTable";
 import { fetchSummarySpreadsheet } from "@/app/actions";
+import { Campaign, parseExcelData } from "./parseExcelData";
+import ChartBase from "../charts/ChartBase";
 
+//TODO: does this retrieve a snapshot or the most recent version.
 const API_URL =
   "https://systemsteam17storage.blob.core.windows.net/summary/FormattedAnnualBudget.xlsx?se=2025-04-10T23%3A59%3A59Z&sp=r&sv=2022-11-02&sr=b&sig=1DvdyO%2BRgtocwWEPBo1GmfRZG4CimWg8QYHXYIEQ6a0%3D"; // Direct Blob URL
 
-interface FinancialMetrics {
-  netBillable: number;
-  agencyCommission: number;
-  levyASBOF: number;
-  invoiceVal: number;
-  plannedSpend: number;
-  reservedBudget: number;
-  totalBudget: number;
-  totalInvoicedToDate: number;
-  poValueRemaining: number;
-}
 
-interface Channel {
-  name: string;
-  financials: FinancialMetrics;
-}
-
-export interface Campaign {
-  poNumber: string;
-  name: string;
-  channels: Channel[];
-  financials: FinancialMetrics;
-  market: string;
-  isSubCampaign?: boolean;
-  parentCampaignName?: string;
-}
 
 const ExpenseDashboard: React.FC = () => {
   interface ParsedData {
@@ -53,65 +31,8 @@ const ExpenseDashboard: React.FC = () => {
     fshew: [],
     wfj: [],
   });
-  const [isEmpty, setIsEmpty] = useState<boolean>(false); // State to track if data is empty
-  const router = useRouter(); // Initialize the router for navigation
-
-  const parseExcelData = (rawData: string[][]): Campaign[] => {
-    if (!rawData || rawData.length < 2) return [];
-
-    const dataRows = rawData.slice(1); // Skip the header row
-    const campaigns: Campaign[] = [];
-    let currentCampaign: Campaign | null = null;
-
-    dataRows.forEach((row) => {
-      const financials: FinancialMetrics = {
-        netBillable: Number(row[10]) || 0,
-        agencyCommission: Number(row[11]) || 0,
-        levyASBOF: Number(row[12]) || 0,
-        invoiceVal: Number(row[13]) || 0,
-        plannedSpend: Number(row[7]) || 0,
-        reservedBudget: Number(row[8]) || 0,
-        totalBudget: Number(row[9]) || 0,
-        totalInvoicedToDate: Number(row[14]) || 0,
-        poValueRemaining: Number(row[15]) || 0,
-      };
-
-      if (row[0]) {
-        if (currentCampaign) {
-          campaigns.push(currentCampaign);
-        }
-
-        currentCampaign = {
-          poNumber: String(row[0] || ""),
-          name: String(row[5] || ""),
-          market: String(row[4] || ""),
-          financials: { ...financials },
-          channels: [],
-        };
-      }
-
-      if (row[6] && row[6] !== "Total") {
-        if (currentCampaign) {
-          currentCampaign.channels.push({
-            name: String(row[6] || ""),
-            financials: { ...financials },
-          });
-        }
-      }
-
-      if (row[6] === "Total") {
-        if (currentCampaign) {
-          currentCampaign.financials = { ...financials };
-        }
-      }
-    });
-
-    if (currentCampaign) {
-      campaigns.push(currentCampaign);
-    }
-
-    return campaigns;
-  };
+  const [isEmpty, setIsEmpty] = useState<boolean>(false);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchExcelFile = async () => {
@@ -139,7 +60,7 @@ const ExpenseDashboard: React.FC = () => {
             parseExcelData(fshewRawData),
             parseExcelData(wfjRawData),
           ];
-
+          console.log([processedFnb, processedFshew, processedWfj])
           setParsedData({
             fnb: processedFnb,
             fshew: processedFshew,
@@ -214,6 +135,12 @@ const ExpenseDashboard: React.FC = () => {
                     parsedData.wfj,
                   ].flat()}
                 />
+                <ChartBase graphType={"bar_chart"} />
+                <ChartBase graphType={"line_chart"} />
+                <ChartBase graphType={"pie_chart_channel"} />
+                <ChartBase graphType={"pie_chart_division"} />
+                <ChartBase graphType={"pie_chart_market"} />
+                <ChartBase graphType={"pie_chart_monthly"} />
               </div>
             ) : (
               <p>No data available.</p>

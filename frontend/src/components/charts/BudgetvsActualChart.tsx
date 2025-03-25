@@ -5,7 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { ChartContainer, ChartConfig } from "@/components/ui/chart"
 import { Card, CardContent } from "../ui/card"
 import { Label } from "../ui/label"
-import { Campaign } from "../dashboard/page"
+import { Campaign } from "../dashboard/parseExcelData"
 
 type BarChartProps = {
   chartData: Campaign[];
