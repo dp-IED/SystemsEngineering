@@ -365,7 +365,6 @@ def generate_excel_report(output_path):
     | project Campaign, PlannedSpend, ReservedBudget, TotalBudget, Market
     """
 
-    ANNUAL_BUDGET_QUERY = "annual_budget_sheet"
 
     # Authentication (Choose the appropriate method)
 
@@ -391,7 +390,7 @@ def generate_excel_report(output_path):
             # Define Ingestion Properties
             ingestion_props = IngestionProperties(
                 database=DATABASE,
-                table="new_summary",
+                table="summary",
                 data_format=DataFormat.CSV,  # You can also use JSON or Parquet
                 report_level=ReportLevel.FailuresAndSuccesses,
                 flush_immediately=True  # Ensure data is available quickly
@@ -404,14 +403,12 @@ def generate_excel_report(output_path):
     # Execute the query
     response_1 = client.execute(DATABASE, BILLED_QUERY)
     response_2 = client.execute(DATABASE, BUDGET_QUERY)
-    response_3 = client.execute(DATABASE, ANNUAL_BUDGET_QUERY)
 
     data = dataframe_from_result_table(response_1.primary_results[0])
 
     # Convert response to Pandas DataFrame
     cleaned_billed = dataframe_from_result_table(response_1.primary_results[0])
     cleaned_budget_tracker = dataframe_from_result_table(response_2.primary_results[0])
-    annual_budget = dataframe_from_result_table(response_3.primary_results[0])
 
     pd.set_option("display.max_columns", None)
     pd.set_option("display.max_rows", None) 
