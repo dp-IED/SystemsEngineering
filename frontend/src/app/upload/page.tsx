@@ -31,8 +31,7 @@ export default function UploadPage() {
     const response = await uploadFile(formData);
     if (response.success) {
       toast({
-          title: "File Uploaded. Please wait a few minutes for the system to generate the spreadsheets.",
-          description: `File URL: ${response.url}`
+          title: "File Uploaded. Please wait about 1 minute for the system to generate the spreadsheet.",
         })
     } else {
       toast({
@@ -46,6 +45,7 @@ export default function UploadPage() {
   return (
     <div className="space-y-4">
       <h1>Upload File</h1>
+      <p>Please ensure the file name includes specific keywords depending on its type: 'Billed' for billed files and 'Tracker' for budget trackers.</p>
       <div className="grid w-full max-w-sm items-center gap-1.5">
         <Label htmlFor="file">XLSX or CSV File</Label>
         <Input id="file" type="file" onChange={handleFileChange}/>
