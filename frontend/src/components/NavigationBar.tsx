@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import ChanelLogo from "@/public/chanel.jpg";
+import ChanelLogo from "@/images/chanel.jpg";
 
 
 const NavigationBar = () => {
