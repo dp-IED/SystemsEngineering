@@ -13,9 +13,9 @@ from utils import get_kusto_kcsb
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
 
-@app.route(route="ADXGRAPH")
-def ADXgraph(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info('Python HTTP trigger function processed a request.')
+@app.route(route="adxGraph")
+def adxGraph(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info("Python HTTP trigger function processed a request.")
     
     # Cluster and database configuration
     CLUSTER = "https://chanelmediacluster.uksouth.kusto.windows.net"
