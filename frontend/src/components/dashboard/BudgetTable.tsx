@@ -58,25 +58,13 @@ const BudgetTable: React.FC<BudgetTableProps> = ({ data, isLoading }) => {
               PO Number
             </TableHead>
             <TableHead className="p-3 font-bold text-center" rowSpan={2}>
+              Market
+            </TableHead>
+            <TableHead className="p-3 font-bold text-center" rowSpan={2}>
               Campaign
             </TableHead>
             <TableHead className="p-3 font-bold text-center" rowSpan={2}>
               Channel
-            </TableHead>
-            <TableHead className="p-3 font-bold text-center" rowSpan={2}>
-              Product Code
-            </TableHead>
-            <TableHead className="p-3 font-bold text-center" rowSpan={2}>
-              Net Billable
-            </TableHead>
-            <TableHead className="p-3 font-bold text-center" rowSpan={2}>
-              Agency Commission
-            </TableHead>
-            <TableHead className="p-3 font-bold text-center" rowSpan={2}>
-              Levy (ASBOF)
-            </TableHead>
-            <TableHead className="p-3 font-bold text-center" rowSpan={2}>
-              Total Invoice Val
             </TableHead>
             <TableHead className="p-3 font-bold text-center" rowSpan={2}>
               Planned Spend
@@ -88,33 +76,23 @@ const BudgetTable: React.FC<BudgetTableProps> = ({ data, isLoading }) => {
               Total Budget
             </TableHead>
             <TableHead className="p-3 font-bold text-center" rowSpan={2}>
-              Channel Budget
+              Net Billable
             </TableHead>
             <TableHead className="p-3 font-bold text-center" rowSpan={2}>
-              Market
+              Agency Commission
             </TableHead>
-            {months.map((month, index) => (
-              <TableHead
-                key={index}
-                colSpan={4}
-                className="p-3 font-bold text-center border"
-              >
-                {month}
-              </TableHead>
-            ))}
+            <TableHead className="p-3 font-bold text-center" rowSpan={2}>
+              Levy (ASBOF)
+            </TableHead>
+            <TableHead className="p-3 font-bold text-center" rowSpan={2}>
+              Total Invoiced to Date
+            </TableHead>
+            
+          
+            
           </TableRow>
 
-          {/* Second Row: 4 Subheaders Per Month */}
-          <TableRow>
-            {Array(12)
-              .fill(monthlySubHeaders)
-              .flat()
-              .map((subHeader, index) => (
-                <TableHead key={index} className="p-3 font-bold border">
-                  {subHeader}
-                </TableHead>
-              ))}
-          </TableRow>
+          
         </TableHeader>
 
         <TableBody>
@@ -124,23 +102,23 @@ const BudgetTable: React.FC<BudgetTableProps> = ({ data, isLoading }) => {
               className={rowIndex % 2 === 0 ? "bg-gray-50" : "bg-white"}
             >
               <TableCell>{row.poNumber}</TableCell>
+              <TableCell>{row.market}</TableCell>
               <TableCell>{row.name}</TableCell>
               <TableCell>
                 {row.channels.map((channel) => channel.name).join(", ")}
               </TableCell>
-              <TableCell>0</TableCell>
+              <TableCell>{row.financials.plannedSpend}</TableCell>
+              <TableCell>{row.financials.reservedBudget}</TableCell>
+              <TableCell>{row.financials.totalBudget}</TableCell>
               <TableCell>{row.financials.netBillable}</TableCell>
               <TableCell>{row.financials.agencyCommission}</TableCell>
               <TableCell>{row.financials.levyASBOF}</TableCell>
               <TableCell>{row.financials.invoiceVal}</TableCell>
-              <TableCell>{row.financials.plannedSpend}</TableCell>
-              <TableCell>{row.financials.reservedBudget}</TableCell>
-              <TableCell>{row.financials.totalBudget}</TableCell>
+              
               {/*// TODO: FIX
               // 
               // <TableCell>{row.financials.chanelBudget}</TableCell> 
               // */}
-              <TableCell>{row.market}</TableCell>
             </TableRow>
           ))}
         </TableBody>

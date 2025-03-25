@@ -18,7 +18,7 @@ export async function uploadFile(formData: FormData) {
   const blobServiceClient = BlobServiceClient.fromConnectionString(AZURE_STORAGE_CONNECTION_STRING);
   const containerClient = blobServiceClient.getContainerClient("subcontractor-documents");
 
-  const blobName = `${Date.now()}-${file.name}`;
+  const blobName = file.name;
   const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
   await blockBlobClient.upload(buffer, buffer.length);
