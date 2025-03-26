@@ -54,7 +54,7 @@ def process_budget_tracker(blob_name, blob_service_client):
     blob_client = blob_service_client.get_blob_client(INPUT_CONTAINER, cleaned_blob_name)
     downloaded_blob = blob_client.download_blob().readall()
     
-    df = pd.read_excel(io.BytesIO(downloaded_blob), sheet_name="Budget tracker 16.12.24")
+    df = pd.read_excel(io.BytesIO(downloaded_blob), sheet_name="Budget tracker")
     # remove fully empty rows and columns
     df.dropna(how="all", inplace=True)
     df.dropna(how='all',axis=1, inplace=True)

@@ -5,3 +5,10 @@
 azure-functions
 azure-identity
 azure-kusto-data
+azure-storage-blob==12.19.1
+pandas
+openpyxl
+azure-storage-blob
+azure-kusto-data
+azure-kusto-ingest
+azure-identity
