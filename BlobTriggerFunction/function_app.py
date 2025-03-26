@@ -17,8 +17,7 @@ def BlobTriggerFunction(myblob: func.InputStream):
     blob_service_client = BlobServiceClient.from_connection_string(CONNECTION_STRING)
 
     # Call `convert.py` functions
-    if "Chanel UK Billed.xlsx" in myblob.name:
+    if "Billed" in myblob.name:
         process_billed(myblob.name, blob_service_client)
-    elif "Budget Tracker.xlsx" in myblob.name:
+    elif "Tracker" in myblob.name:
         process_budget_tracker(myblob.name, blob_service_client)
-    

@@ -4,6 +4,7 @@ import React, { ReactNode } from "react";
 import { ClerkProvider } from "@clerk/nextjs";
 import NavigationBar from "../components/NavigationBar";
 import "./globals.css";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

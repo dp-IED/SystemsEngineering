@@ -1,7 +1,0 @@
-Component,Current Status,Proposed Enhancement,Technical Requirements
-File Processing,Basic CSV & PDF handling,Multi-format processor for all file types,Azure Form Recognizer and File storage system
-Data Standardization,LLM invoice matching,Extended matching across all systems,Azure OpenAI and Custom training data
-Reconciliation,LLM Validation,Automated matching with exception flagging,Business rules engine and Validation framework
-Real-time Pipeline,Not implemented,Automated monthly workflow,Event-driven architecture and Status tracking
-Database,Basic storage,Comprehensive relational structure,Azure SQL and Data versioning
-User Interface,Basic upload,Full-featured dashboard,Next.js and Real-time updates

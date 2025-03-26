@@ -5,7 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { ChartContainer, ChartConfig } from "@/components/ui/chart"
 import { Card, CardContent } from "../ui/card"
 import { Label } from "../ui/label"
-import { Campaign } from "../dashboard/page"
+import { Campaign } from "../dashboard/parseExcelData"
 
 type BarChartProps = {
   chartData: Campaign[];
@@ -49,7 +49,6 @@ export function BudgetvsActualChart(props: BarChartProps) {
     }))
     .sort((a, b) => b.budget - a.budget) // Sort by budget size (descending)
     .slice(0, 10); // Limit to top 10 campaigns for readability
-  
   // Calculate totals for the title
   const totalActual = chartData.reduce((sum, campaign) => sum + campaign.financials.invoiceVal, 0);
   const totalBudget = chartData.reduce((sum, campaign) => sum + campaign.financials.totalBudget, 0);
