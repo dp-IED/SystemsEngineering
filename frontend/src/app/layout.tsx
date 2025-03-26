@@ -1,14 +1,31 @@
 "use client";
 
 import React, { ReactNode } from "react";
-import { ClerkProvider } from "@clerk/nextjs";
+import { ClerkProvider, RedirectToSignIn, useAuth } from "@clerk/nextjs";
 import NavigationBar from "../components/NavigationBar";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 
+function ProtectedRoute({ children }: { children: ReactNode }) {
+  const { isLoaded, isSignedIn } = useAuth();
+
+  if (!isLoaded) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isSignedIn) {
+    return <RedirectToSignIn />;
+  }
+
+  return <>{children}</>;
+}
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <ClerkProvider signInUrl="https://saving-tortoise-69.accounts.dev/sign-in">
+    <ClerkProvider
+      signInUrl="https://saving-tortoise-69.accounts.dev/sign-in"
+      publishableKey="pk_test_c2F2aW5nLXRvcnRvaXNlLTY5LmNsZXJrLmFjY291bnRzLmRldiQ"
+    >
       <html lang="en">
         <head>
           <title>Chanel Expense Dashboard</title>
@@ -22,7 +39,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <body className="antialiased bg-background text-foreground font-sans min-h-screen flex flex-col">
           <header className="w-full bg-black flex items-center justify-end px-8 py-4 shadow-lg"></header>
           <NavigationBar />
-          <main className="container mx-auto py-6 px-4 flex-grow">{children}</main>
+          <main className="container mx-auto py-6 px-4 flex-grow">
+            <ProtectedRoute>{children}</ProtectedRoute>
+          </main>
+          <Toaster />
           <footer className="mt-4 p-4 bg-slate-900 text-white text-center sticky bottom-0 w-full">
             © 2024 Chanel. All rights reserved.
           </footer>

@@ -15,12 +15,7 @@ import {
   Legend,
 } from "recharts";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
@@ -56,11 +51,11 @@ export default function GraphBase(props: { graphType: GraphType }) {
   }, [props.graphType]);
 
   if (loading) {
-    return <p>Loading chart...</p>; // Show a loading message while data is being fetched
+    return <p>Loading chart...</p>;
   }
 
   if (!data || data.length === 0) {
-    return <p>No data available for the selected graph type.</p>; // Show a fallback message if no data is available
+    return <p>No data available for the selected graph type.</p>;
   }
 
   // Define chart configuration dynamically based on graphType
@@ -70,11 +65,11 @@ export default function GraphBase(props: { graphType: GraphType }) {
         return {
           TotalPlannedSpend: {
             label: "Planned Spend",
-            color: "hsl(var(--chart-1))",
+            color: "#1f77b4",
           },
           TotalActualSpend: {
             label: "Actual Spend",
-            color: "hsl(var(--chart-2))",
+            color: "#ff7f0e",
           },
         } satisfies ChartConfig;
       case "line_chart":
@@ -100,7 +95,8 @@ export default function GraphBase(props: { graphType: GraphType }) {
     }
   })();
 
-  // Determine the dataKey dynamically based on graphType
+  // Determine the dataKey dynamically based on the graphType.
+  // For campaign pie chart we use "Campaign" for the name on the pie.
   const dataKey = (() => {
     switch (props.graphType) {
       case "bar_chart":
@@ -122,42 +118,68 @@ export default function GraphBase(props: { graphType: GraphType }) {
     }
   })();
 
-  // Filter out invalid or undefined values and exclude "Total" for specific graph types
+  // Filter out invalid entries, empty values, and rows with 0 TotalSpend,
+  // if TotalSpend exists and should be non-zero.
   const filterInvalidValues = (
     data: { [key: string]: number | string }[],
     key: string
   ) => {
     return data.filter((item) => {
-      // Exclude rows with undefined, null, or empty values
+      if (item[key] === undefined || item[key] === null || item[key] === "") {
+        return false;
+      }
+      // Exclude rows where TotalSpend is 0 (if TotalSpend is numeric)
       if (
-        item[key] === undefined ||
-        item[key] === null ||
-        item[key] === ""
+        props.graphType.startsWith("pie_chart") &&
+        typeof item["TotalSpend"] === "number" &&
+        item["TotalSpend"] === 0
       ) {
         return false;
       }
-
-      // Exclude "Total" row for pie_chart_monthly and pie_chart_channel
+      // Exclude "Total" rows for specific graph types.
       if (
         (props.graphType === "pie_chart_monthly" ||
-          props.graphType === "pie_chart_channel") &&
+          props.graphType === "pie_chart_channel" ||
+          (props.graphType === "line_chart" && key === "Month")) &&
         item[key] === "Total"
       ) {
         return false;
       }
-
       return true;
     });
   };
 
-  const processedData = filterInvalidValues(data, dataKey);
+  let processedData = filterInvalidValues(data, dataKey);
 
-  // Render the appropriate chart based on graphType
+  // Sort the data for the line chart based on calendar months.
+  if (props.graphType === "line_chart") {
+    const monthOrder = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    processedData = processedData.sort((a, b) => {
+      const aValue = a[dataKey] as string;
+      const bValue = b[dataKey] as string;
+      return monthOrder.indexOf(aValue) - monthOrder.indexOf(bValue);
+    });
+  }
+
+  // Render the appropriate chart based on graphType.
   const renderChart = () => {
     switch (props.graphType) {
       case "bar_chart":
         return (
-          <BarChart accessibilityLayer data={processedData}>
+          <BarChart data={processedData}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey={dataKey}
@@ -166,26 +188,26 @@ export default function GraphBase(props: { graphType: GraphType }) {
               axisLine={false}
             />
             <YAxis />
-            <Legend/>
+            <Legend />
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent indicator="dashed" />}
             />
             <Bar
               dataKey="TotalPlannedSpend"
-              fill="var(--color-planned-spend)"
+              fill={chartConfig["TotalPlannedSpend"]?.color ?? "#cccccc"}
               radius={4}
             />
             <Bar
               dataKey="TotalActualSpend"
-              fill="var(--color-actual-spend)"
+              fill={chartConfig["TotalActualSpend"]?.color ?? "#dddddd"}
               radius={4}
             />
           </BarChart>
         );
       case "line_chart":
         return (
-          <LineChart accessibilityLayer data={processedData}>
+          <LineChart data={processedData}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey={dataKey}
@@ -194,7 +216,7 @@ export default function GraphBase(props: { graphType: GraphType }) {
               axisLine={false}
             />
             <YAxis />
-            <Legend/>
+            <Legend />
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent indicator="dashed" />}
@@ -202,7 +224,7 @@ export default function GraphBase(props: { graphType: GraphType }) {
             <Line
               type="monotone"
               dataKey="TotalSpend"
-              stroke="hsl(var(--chart-1))" // Fixed stroke color
+              stroke={chartConfig["TotalSpend"]?.color ?? "hsl(var(--chart-1))"}
               strokeWidth={2}
               dot={false}
             />
@@ -235,7 +257,7 @@ export default function GraphBase(props: { graphType: GraphType }) {
                 />
               ))}
             </Pie>
-            <Legend/>
+            <Legend />
           </PieChart>
         );
       default:
@@ -243,7 +265,7 @@ export default function GraphBase(props: { graphType: GraphType }) {
     }
   };
 
-  // Dynamic title based on graphType
+  // Set a dynamic title based on graphType.
   const title = (() => {
     switch (props.graphType) {
       case "bar_chart":
@@ -271,6 +293,7 @@ export default function GraphBase(props: { graphType: GraphType }) {
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
+        {/* @ts-expect-error: ChartContainer config prop does not match the inferred type */}
         <ChartContainer config={chartConfig}>{renderChart()}</ChartContainer>
       </CardContent>
     </Card>

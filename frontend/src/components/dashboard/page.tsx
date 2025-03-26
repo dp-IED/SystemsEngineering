@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import * as XLSX from "xlsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { OverallSpendingChart } from "@/components/charts/OverallSpendingChart";
-import { BudgetvsActualChart } from "../charts/BudgetvsActualChart";
 import BudgetTable from "./BudgetTable";
 import { fetchSummarySpreadsheet } from "@/app/actions";
 import { Campaign, parseExcelData } from "./parseExcelData";
@@ -15,8 +13,6 @@ import ChartBase from "../charts/ChartBase";
 //TODO: does this retrieve a snapshot or the most recent version.
 const API_URL =
   "https://systemsteam17storage.blob.core.windows.net/summary/FormattedAnnualBudget.xlsx?se=2025-04-10T23%3A59%3A59Z&sp=r&sv=2022-11-02&sr=b&sig=1DvdyO%2BRgtocwWEPBo1GmfRZG4CimWg8QYHXYIEQ6a0%3D"; // Direct Blob URL
-
-
 
 const ExpenseDashboard: React.FC = () => {
   interface ParsedData {
@@ -60,7 +56,7 @@ const ExpenseDashboard: React.FC = () => {
             parseExcelData(fshewRawData),
             parseExcelData(wfjRawData),
           ];
-          console.log([processedFnb, processedFshew, processedWfj])
+          console.log([processedFnb, processedFshew, processedWfj]);
           setParsedData({
             fnb: processedFnb,
             fshew: processedFshew,
@@ -121,26 +117,12 @@ const ExpenseDashboard: React.FC = () => {
               <p>Loading Excel Data...</p>
             ) : parsedData ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                <OverallSpendingChart
-                  chartData={[
-                    parsedData.fnb,
-                    parsedData.fshew,
-                    parsedData.wfj,
-                  ].flat()}
-                />
-                <BudgetvsActualChart
-                  chartData={[
-                    parsedData.fnb,
-                    parsedData.fshew,
-                    parsedData.wfj,
-                  ].flat()}
-                />
+                <ChartBase graphType={"pie_chart_campaign"} />
                 <ChartBase graphType={"bar_chart"} />
                 <ChartBase graphType={"line_chart"} />
                 <ChartBase graphType={"pie_chart_channel"} />
-                <ChartBase graphType={"pie_chart_division"} />
                 <ChartBase graphType={"pie_chart_market"} />
-                <ChartBase graphType={"pie_chart_monthly"} />
+                <ChartBase graphType={"pie_chart_division"} />
               </div>
             ) : (
               <p>No data available.</p>

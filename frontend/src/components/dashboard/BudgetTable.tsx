@@ -26,27 +26,27 @@ const BudgetTable: React.FC<BudgetTableProps> = ({ data, isLoading }) => {
     return <p>No data available.</p>;
   }
 
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+  //const months = [
+  //  "January",
+  //  "February",
+  //  "March",
+  //  "April",
+  //  "May",
+  //  "June",
+  //  "July",
+  //  "August",
+  //  "September",
+  //  "October",
+  //  "November",
+  //  "December",
+  //];
 
-  const monthlySubHeaders = [
-    "Net Billable",
-    "Agency Commission",
-    "Levy (ASBOF)",
-    "Total Invoice Val",
-  ];
+  //const monthlySubHeaders = [
+  //  "Net Billable",
+  //  "Agency Commission",
+  //  "Levy (ASBOF)",
+  //  "Total Invoice Val",
+  //];
 
   return (
     <div className="overflow-x-auto border border-gray-300 shadow-md rounded-lg">
