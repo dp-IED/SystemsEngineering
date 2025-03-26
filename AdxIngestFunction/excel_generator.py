@@ -65,17 +65,6 @@ def generate_excel_report(output_path):
                     cell.alignment = Alignment(horizontal="center", vertical="center")
                     cell.font = Font(bold=True, size=12)
                     
-    def set_column_width(sheet, start_col, headers, months):
-        """
-        Set the width of the columns based on the header text.
-        """
-        num_columns = len(headers)
-        for i, month in enumerate(months):
-            month_start_col = start_col + i * num_columns
-            for j in range(num_columns):
-                col_letter = get_column_letter(month_start_col + j)
-                sheet.column_dimensions[col_letter].width = max(len(header) for header in headers) + 2  # Adding extra space for padding
-
     def fill_colours(filename):
         wb = load_workbook(filename)
         delete_column_from_sheets(wb, "Division")
@@ -619,18 +608,6 @@ def generate_excel_report(output_path):
     # print(summary_df)
     # append_monthly_tables_to_excel(filename, start_col)
     ingest_summary(KCSB_INGEST, ingest_summary_df)
-
-    def save_dataframe_to_excel(df, filename, divisions):
-        """
-        Saves the DataFrame to an Excel file, splitting it into sheets by divisions.
-        """
-        with pd.ExcelWriter(filename, engine='openpyxl', mode='w') as writer:
-            for division in divisions:
-                df_division = df[df['Division'] == division]
-                sheet_name = str(division).replace(':', '').replace('\\', '').replace('/', '').replace('?', '').replace('*', '')[:31]
-                if sheet_name.strip() == '':
-                    sheet_name = 'Other'
-                df_division.to_excel(writer, sheet_name=sheet_name, index=False)
 
     def create_monthly_summary_sheet(filename, data):
         """
