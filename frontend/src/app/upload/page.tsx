@@ -31,7 +31,7 @@ export default function UploadPage() {
     const response = await uploadFile(formData);
     if (response.success) {
       toast({
-          title: "File Uploaded. Please wait about 1 minute for the system to generate the spreadsheet.",
+          title: "File Uploaded. Please wait about 1 minute before going back to the home page for the system to generate the spreadsheet.",
         })
     } else {
       toast({
