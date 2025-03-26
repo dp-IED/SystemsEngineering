@@ -45,7 +45,7 @@ export default function UploadPage() {
   return (
     <div className="space-y-4">
       <h1>Upload File</h1>
-      <p>{"Please ensure the file name includes specific keywords depending on its type: 'Billed' for billed files and 'Tracker' for budget trackers."}</p>
+      <p>{"Please ensure the file name includes specific keywords depending on its type: 'Billed' for billed files and 'Tracker' for budget trackers. For the Billed file, please ensure that the 4 sheet names are the following : F_B, WFJ, FASHION, PAID SEARCH. As for the Budget Tracker, please ensure that the budget tracker sheet is named 'Budget tracker’."}</p>
       <div className="grid w-full max-w-sm items-center gap-1.5">
         <Label htmlFor="file">XLSX File</Label>
         <Input id="file" type="file" onChange={handleFileChange}/>
