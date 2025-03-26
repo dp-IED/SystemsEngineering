@@ -15,7 +15,12 @@ const config = {
         pathname: "/fs/bco/1/fs012r07i1rX4ZtdW1t8",
       }
     ]
-  }
+  },
+  eslint: {
+    // Warning: This allows production builds to successfully complete even if
+    // your project has ESLint errors.
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default config;

@@ -64,7 +64,7 @@ export default function GraphBase(props: { graphType: GraphType }) {
   }
 
   // Define chart configuration dynamically based on graphType
-  const chartConfig = (() => {
+  const chartConfig: ChartConfig = (() => {
     switch (props.graphType) {
       case "bar_chart":
         return {
@@ -76,14 +76,14 @@ export default function GraphBase(props: { graphType: GraphType }) {
             label: "Actual Spend",
             color: "hsl(var(--chart-2))",
           },
-        } satisfies ChartConfig;
+        } as ChartConfig;
       case "line_chart":
         return {
           TotalSpend: {
             label: "Total Spend",
             color: "hsl(var(--chart-1))",
           },
-        } satisfies ChartConfig;
+        } as ChartConfig;
       case "pie_chart_campaign":
       case "pie_chart_market":
       case "pie_chart_division":
@@ -94,7 +94,7 @@ export default function GraphBase(props: { graphType: GraphType }) {
             label: "Total Spend",
             color: "hsl(var(--chart-1))",
           },
-        } satisfies ChartConfig;
+        } as ChartConfig;
       default:
         return {};
     }

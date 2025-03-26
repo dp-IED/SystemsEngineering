@@ -1,10 +1,11 @@
 import { GraphType } from "./ChartBase";
 
 export default async function fetchKustoData(graphType: GraphType) {
-  const apibase = "http://localhost:7071";
+  // Use the deployed URL as the base API URL
+  const apibase = "https://finsyncadxgraphs.azurewebsites.net/api/adxGraph";
   if (graphType) {
     try {
-      const response = await fetch(apibase + `/api/adxGraph?type=${graphType}`);
+      const response = await fetch(apibase + `?type=${graphType}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -18,7 +19,7 @@ export default async function fetchKustoData(graphType: GraphType) {
       console.error("Failed to fetch data:", error);
       return {
         status: "error",
-        error: error
+        error: error,
       };
     }
   } else {
