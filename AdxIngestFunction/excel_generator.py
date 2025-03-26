@@ -319,19 +319,19 @@ def generate_excel_report(output_path):
     Reserve = ['Reserve'] // Include the reserve amount
     | extend TotalAvailableBudget = GrandTotalReserve // Budget already includes reserve
     | extend Campaign = tolower(trim(" ", Campaign))
-    | extend Campaign = replace_regex(Campaign, @"\b(UK|IRE|SOCIAL|DISPLAY|FEE|DSP|DISP|)\b", "")
+    | extend Campaign = replace_regex(Campaign, @"\b(UK|IRE|SOCIAL|DISPLAY|FEE|DSP|DISP)\b", "")
     | join kind=leftouter (
     billed_report
     | extend Campaign = replace_regex(CampaignName, @"_", " ")
     | extend Campaign = replace_regex(Campaign, @"\b(CHANEL)\b", "")
     | extend Campaign = replace_regex(Campaign, @"-", " ")
-    | extend Campaign = replace_regex(Campaign, @"\b(UK|IRE|SOCIAL|DISPLAY|FEE|DSP|DISP|)\b", "")
+    | extend Campaign = replace_regex(Campaign, @"\b(UK|IRE|SOCIAL|DISPLAY|FEE|DSP|DISP)\b", "")
     | extend Campaign = trim(" ", replace_regex(Campaign, @"(20\d{2})\b|FB|FR|MU|WFJ|WA|FSH|BEA|VIDEO|\.", ""))
     | extend Campaign = trim(" ", replace_regex(Campaign, @"\s+", " "))
     | extend Campaign = tolower(Campaign)
     | extend Campaign = case(
     Campaign contains "bleu", "Bleu",
-    Campaign contains "no.5", "No 5",
+    Campaign contains "no.5", "No. 5",
     Campaign contains "les beige", "Make Up",
     Campaign contains "coco melle", "Coco Melle",
     Campaign contains "chance", "Chance",
