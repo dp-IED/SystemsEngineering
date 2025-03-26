@@ -102,36 +102,6 @@ def process_budget_tracker(blob_name, blob_service_client):
     blob_client_output = blob_service_client.get_blob_client(OUTPUT_CONTAINER, "budgettracker.csv")
     blob_client_output.upload_blob(df_csv, overwrite=True)
  
-def process_annual_budget_sheet(blob_name, blob_service_client):
-    cleaned_blob_name = blob_name.replace(f"{INPUT_CONTAINER}/", "")
-    blob_client = blob_service_client.get_blob_client(INPUT_CONTAINER, cleaned_blob_name)
-    downloaded_blob = blob_client.download_blob().readall()
-    
-    df = pd.read_excel(io.BytesIO(downloaded_blob), header=None)
-    header_rows = df.iloc[0:6]
-    df = df.drop(index=range(0, 6))
-    headers = ["ADVERTISING AND MEDIA EXPENDITURES"]
-    current_prefix = "PREVIOUS YEARS"
-    for i in range(1, header_rows.shape[1]):
-        column_headers = header_rows.iloc[:, i].dropna().unique()
-        header_label = ', '.join(map(str, column_headers))
-        if header_label == "2024.0":
-            header_label = "YTD % 2024"
-        elif header_label == "2025 BUDGET       , 2025, Year, Budget":
-            header_label = "Year 2025 Budget"
-        elif header_label == "FORECAST, 2024 CURRENT FORECAST, 2024, Year, Q3F":
-            header_label = "2024 CURRENT FORECAST, Q3F"
-        elif header_label == "YTD VS PY, YTD 23, 2023, Nov YTD, Actual":
-            header_label = "YTD 23, 2023, Nov YTD, Actual"
-        if any(prefix in header_label for prefix in ["PERIOD", "FORECAST", "YTD VS PY"]):
-            current_prefix = header_label.split(',')[0]
-        headers.append(f"{current_prefix}, {header_label}" if 'PREVIOUS YEARS' not in header_label else header_label)
-    df.columns = headers
-    df = df.dropna(axis=1, how="all")
-    clean_csv = df.to_csv(header=None, index=False, encoding="utf-8")
-    blob_client_output = blob_service_client.get_blob_client(OUTPUT_CONTAINER, "annual_budget_sheet.csv")
-    blob_client_output.upload_blob(clean_csv, overwrite=True)
- 
 def main(myblob: func.InputStream):
     cleaned_blob_name = blob_name.replace(f"{INPUT_CONTAINER}/", "")
     blob_client = blob_service_client.get_blob_client(INPUT_CONTAINER, cleaned_blob_name)
