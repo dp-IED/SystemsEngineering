@@ -38,6 +38,7 @@ def adxGraph(req: func.HttpRequest) -> func.HttpResponse:
     queries = {
         "bar_chart": """
             summary
+            | extend Total_Invoice_Val = iif(Month == "Total", decimal(0), Total_Invoice_Val)
             | summarize TotalPlannedSpend = sum(PlannedSpend), TotalActualSpend = sum(Total_Invoice_Val) by Market
             | order by Market asc
         """,
@@ -48,21 +49,25 @@ def adxGraph(req: func.HttpRequest) -> func.HttpResponse:
         """,
         "pie_chart_campaign": """
             summary
+            | extend Total_Invoice_Val = iif(Month == "Total", decimal(0), Total_Invoice_Val)
             | summarize TotalSpend = sum(Total_Invoice_Val) by Campaign
             | order by TotalSpend desc
         """,
         "pie_chart_market": """
             summary
+            | extend Total_Invoice_Val = iif(Month == "Total", decimal(0), Total_Invoice_Val)
             | summarize TotalSpend = sum(Total_Invoice_Val) by Market
             | order by TotalSpend desc
         """,
         "pie_chart_division": """
             summary
+            | extend Total_Invoice_Val = iif(Month == "Total", decimal(0), Total_Invoice_Val)
             | summarize TotalSpend = sum(Total_Invoice_Val) by Division
             | order by TotalSpend desc
         """,
         "pie_chart_channel": """
             summary
+            | extend Total_Invoice_Val = iif(Month == "Total", decimal(0), Total_Invoice_Val)
             | summarize TotalSpend = sum(Total_Invoice_Val) by Channel
             | order by TotalSpend desc
         """,
