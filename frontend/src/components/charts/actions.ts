@@ -3,7 +3,7 @@ import { GraphType } from "./ChartBase";
 export default async function fetchKustoData(graphType: GraphType) {
   // const apibase = "http://localhost:7071"; // dev
 
-  const apibase = "https://finsyncadxgraphs.azurewebsites.net/api/adxGraph/"; // prod
+  const apibase = "https://finsyncadxgraphs.azurewebsites.net/adxGraph"; // prod
   if (graphType) {
     try {
       const requesturl = new URL(apibase);
