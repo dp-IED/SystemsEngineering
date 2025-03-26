@@ -1,10 +1,15 @@
 import { GraphType } from "./ChartBase";
 
 export default async function fetchKustoData(graphType: GraphType) {
-  const apibase = "http://localhost:7071";
+  // const apibase = "http://localhost:7071"; // dev
+
+  const apibase = "https://finsyncadxgraphs.azurewebsites.net/api/adxGraph/"; // prod
   if (graphType) {
     try {
-      const response = await fetch(apibase + `/api/adxGraph?type=${graphType}`);
+      const requesturl = new URL(apibase);
+      requesturl.searchParams.append("type", graphType);
+      console.log("requesturl", requesturl);
+      const response = await fetch(requesturl.toString());
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -18,7 +23,7 @@ export default async function fetchKustoData(graphType: GraphType) {
       console.error("Failed to fetch data:", error);
       return {
         status: "error",
-        error: error
+        error: error,
       };
     }
   } else {

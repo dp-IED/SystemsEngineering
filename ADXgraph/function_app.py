@@ -7,8 +7,6 @@ from azure.kusto.data.helpers import dataframe_from_result_table
 
 import logging
 
-from utils import get_kusto_kcsb
-
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
@@ -25,8 +23,6 @@ def adxGraph(req: func.HttpRequest) -> func.HttpResponse:
     credential = DefaultAzureCredential()
     token = credential.get_token("https://kusto.kusto.windows.net/.default").token
     KCSB = KustoConnectionStringBuilder.with_aad_application_token_authentication(CLUSTER, token)
-    KCSB_INGEST = get_kusto_kcsb(CLUSTER.replace("https://", "https://ingest-"))
-
     # Create Kusto Client
     client = KustoClient(KCSB)
     

@@ -30,5 +30,3 @@ export async function uploadFile(formData: FormData) {
 
   return { success: true, url: blockBlobClient.url };
 }
-
-// TODO: ADD LISTING OF EXISTING UPLOADED DOCUMENTS WITH DATETIME UPLOADED
