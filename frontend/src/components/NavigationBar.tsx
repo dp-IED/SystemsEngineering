@@ -3,8 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { UserButton } from "@clerk/nextjs"; // Import Clerk's UserButton
 import ChanelLogo from "@/public/chanel.jpg";
-
 
 const NavigationBar = () => {
   return (
@@ -24,8 +24,8 @@ const NavigationBar = () => {
           </h1>
         </div>
 
-        {/* Navigation Links */}
-        <div className="space-x-8 text-sm">
+        {/* Navigation Links & Profile */}
+        <div className="flex items-center space-x-8 text-sm">
           <Link href="/" className="hover:underline">
             Home
           </Link>
@@ -35,6 +35,9 @@ const NavigationBar = () => {
           <Link href="/contact" className="hover:underline">
             Contact
           </Link>
+
+          {/* Clerk User Profile & Sign Out */}
+          <UserButton afterSignOutUrl="/" />
         </div>
       </div>
     </nav>
