@@ -319,6 +319,7 @@ def generate_excel_report(output_path):
     Reserve = ['Reserve'] // Include the reserve amount
     | extend TotalAvailableBudget = GrandTotalReserve // Budget already includes reserve
     | extend Campaign = tolower(trim(" ", Campaign))
+    | extend Campaign = replace_regex(Campaign, @"\b(UK|IRE|SOCIAL|DISPLAY|FEE|DSP|DISP)\b", "")
     | join kind=leftouter (
     billed_report
     | extend Campaign = replace_regex(CampaignName, @"_", " ")
@@ -351,6 +352,7 @@ def generate_excel_report(output_path):
     PlannedSpend = sum(PlannedSpendData),
     ReservedBudget = sum(Reserve)
     by Campaign, Market
+    | extend Campaign = replace_regex(Campaign, @"\.", "")  // Remove "." only after mapping
     | project Campaign, PlannedSpend, ReservedBudget, TotalBudget, Market
     """
 
