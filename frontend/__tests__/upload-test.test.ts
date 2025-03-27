@@ -1,24 +1,52 @@
-//import { uploadFile } from "@/app/upload/actions";
-//import fs from "fs";
-//import path from "path";
+import { BlobServiceClient } from "@azure/storage-blob";
+import { uploadFile } from "@/app/upload/actions";
 
-//describe("File Upload", () => {
-//  it("should upload the controlled file to Azure Blob Storage", async () => {
-//    // Arrange: Read the controlled file
-//    const filePath = path.resolve(__dirname, "test-docs/Chanel UK Billed.xlsx");
-//    const fileBuffer = fs.readFileSync(filePath);
-//    const testFile = new File([fileBuffer], "Chanel UK Billed.xlsx");
+jest.mock("@azure/storage-blob", () => {
+  const originalModule = jest.requireActual("@azure/storage-blob");
 
-//    const formData = new FormData();
-//    formData.append("file", testFile);
+  return {
+    ...originalModule,
+    BlobServiceClient: jest.fn(() => ({
+      getContainerClient: jest.fn(() => ({
+        getBlockBlobClient: jest.fn(() => ({
+          upload: jest.fn().mockResolvedValue({}),
+          url: "http://fake-url.com"
+        }))
+      }))
+    }))
+  };
+});
 
-//    const result = await uploadFile(formData);
+describe("File Upload", () => {
+  it("should handle no file selected error", async () => {
+    const formData = new FormData();
+    const response = await uploadFile(formData);
+    expect(response.error).toBe("No file selected");
+  });
 
-//    if (!result.success) {
-//      console.error("File upload failed:", result.error || "Unknown error");
-//    }
+  it("should handle missing Azure connection string error", async () => {
+    const testFile = new File(["content"], "test.xlsx");
+    const formData = new FormData();
+    formData.append("file", testFile);
+    // Clear environment variable for the test
+    const originalConnectionString = process.env.NEXT_PUBLIC_AZURE_STORAGE_CONNECTION_STRING;
+    process.env.NEXT_PUBLIC_AZURE_STORAGE_CONNECTION_STRING = "";
 
-//    expect(result.success).toBe(true);
-//    expect(result.url).toContain("Chanel%20UK%20Billed.xlsx"); // url encoded filename
-//  });
-//});
+    const response = await uploadFile(formData);
+    expect(response.error).toBe("Azure Storage connection string is missing");
+
+    // Restore environment variable
+    process.env.NEXT_PUBLIC_AZURE_STORAGE_CONNECTION_STRING = originalConnectionString;
+  });
+
+  it("should successfully upload a file", async () => {
+    const testFile = new File(["content"], "test.xlsx");
+    const formData = new FormData();
+    formData.append("file", testFile);
+    process.env.NEXT_PUBLIC_AZURE_STORAGE_CONNECTION_STRING = "fake_connection_string";
+
+    const response = await uploadFile(formData);
+    expect(response.success).toBe(true);
+    expect(response.url).toBe("http://fake-url.com");
+  });
+});
