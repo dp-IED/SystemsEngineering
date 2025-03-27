@@ -1,10 +1,13 @@
 {
-  "azureFunctions.deploySubpath": ".",
+  "azureFunctions.deploySubpath": "AIQuery",
   "azureFunctions.scmDoBuildDuringDeployment": true,
   "azureFunctions.pythonVenv": ".venv",
   "azureFunctions.projectLanguage": "Python",
   "azureFunctions.projectRuntime": "~4",
   "debug.internalConsoleOptions": "neverOpen",
   "azureFunctions.projectLanguageModel": 2,
-  "appService.zipIgnorePattern": ["node_modules{,/**}", ".vscode{,/**}"]
+  "appService.zipIgnorePattern": ["node_modules{,/**}", ".vscode{,/**}"],
+  "appService.defaultWebAppToDeploy": "/subscriptions/6b36389d-db89-4852-a53d-39451aec2ffc/resourceGroups/Systems/providers/Microsoft.Web/sites/chanelmedia",
+  "appService.deploySubpath": "frontend",
+  "azureFunctions.projectSubpath": "ADXgraph"
 }

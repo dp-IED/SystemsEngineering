@@ -10,9 +10,7 @@ import FinsyncLogo from "@/images/finsync.png";
 const NavigationBar = () => {
   return (
     <nav className="bg-black text-white py-4">
-      
       <div className="container mx-auto flex justify-between items-center">
-        
         {/* Logo and Branding */}
         <Link href="/">
           <div className="flex items-center">
@@ -33,6 +31,9 @@ const NavigationBar = () => {
         <div className="flex items-center space-x-8 text-sm">
           <Link href="/" className="hover:underline">
             Home
+          </Link>
+          <Link href="/query" className="hover:underline">
+            Query
           </Link>
           <Link href="/upload" className="hover:underline">
             Upload
