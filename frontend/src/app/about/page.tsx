@@ -5,67 +5,50 @@ import React from "react";
 const About = () => {
   return (
     <div className="container mx-auto px-6 py-12">
-      <h1 className="text-4xl font-bold mb-8 text-center text-black">About Us</h1>
+      <h1 className="text-4xl font-bold mb-8 text-center text-black">About Us & FinSync</h1>
+      
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">Who We Are</h2>
         <p className="leading-relaxed text-lg text-gray-700">
-          We are Daren, Ines, Anika, and Aziret, four University College London
-          (UCL) Computer Science students collaborating with Chanel through the Systems
-          Engineering module. Our mission is to create an innovative tech
-          solution that enhances Chanel´s financial processes.
+          We are Daren, Ines, Anika, and Aziret, four Computer Science graduates from University College London (UCL). In collaboration with Chanel, we have developed FinSync, a state-of-the-art platform designed to revolutionize Chanel's financial processes within their media and finance departments.
         </p>
       </section>
+
       <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-4">Our Platform</h2>
-        <h3 className="text-xl font-medium mb-2">Chanel Media Financial Process Efficiency Project</h3>
+        <h2 className="text-2xl font-semibold mb-4">FinSync: Our Platform</h2>
         <p className="leading-relaxed text-lg text-gray-700">
-          <strong>Overview:</strong> Chanel UK seeks to enhance operational
-          efficiencies in financial tracking within the media department. The
-          project focuses on reducing administrative tasks to improve the client
-          experience. By standardizing and automating processes, we aim to
-          improve the efficiency and accuracy of financial reporting tasks.
+        FinSync automates and consolidates financial data handling, enhancing the efficiency and clarity of Chanel's financial operations. Here are the key functionalities now available on the platform:
+        <ul className="list-disc list-inside text-lg text-gray-700">
+            <li>Automated data aggregation of budgets, planned and actual spends, and invoice details.</li>
+            <li>User-friendly dashboard featuring real-time financial tracking and decision-making support, complete with Excel previews and a variety of graphs for comprehensive visual analytics.  </li>
+            <li>Advanced filtering capabilities accessible through a user-friendly downloadable Excel sheet, allowing detailed analysis by market, division, channel, month, and campaign.</li>
+            <li>Seamless integration with existing systems to ensure workflow continuity and enhance operational efficiency.</li>
+        </ul>
         </p>
       </section>
+
       <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-4">Key Challenges</h2>
+        <h2 className="text-2xl font-semibold mb-4">Key Challenges Overcome</h2>
         <ul className="list-disc list-inside text-lg text-gray-700">
-          <li>Decentralized media spend tracking across divisions</li>
-          <li>Manual collation of reports</li>
-          <li>Inconsistent systems and file structures</li>
-          <li>Varying data formats and report frequencies</li>
-          <li>No control over data structure from different sources</li>
+          <li>Integration of disparate financial data sources into a unified platform.</li>
+          <li>Elimination of manual data entry and associated errors.</li>
+          <li>Standardization of financial reporting across multiple divisions.</li>
         </ul>
       </section>
+
       <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-4">Our Objectives</h2>
+        <h2 className="text-2xl font-semibold mb-4">Project Impact</h2>
         <ul className="list-disc list-inside text-lg text-gray-700">
-          <li>
-            <strong>Efficiency:</strong> Improve the efficiency of tasks and
-            increase outputs in the media team
-          </li>
-          <li>
-            <strong>Automation:</strong> Sync multiple files and create outputs
-            aligned with the media team´s reporting needs
-          </li>
-          <li>
-            <strong>Improvement:</strong> Standardize report structures and
-            eliminate redundant information
-          </li>
-          <li>
-            <strong>Innovation:</strong> Provide near real-time spend
-            visualization and assist monitoring
-          </li>
+        <li>Significantly reduced the time required for financial data processing, cutting it down from weeks to mere minutes.</li>
+        <li>Enhanced accuracy and reliability of financial reports.</li>
+          <li>Empowered the Chanel teams with data-driven insights for better strategic planning.</li>
         </ul>
       </section>
+
       <section className="mb-12">
-        <h2 className="text-2xl font-semibold mb-4">Desired Outcomes</h2>
+        <h2 className="text-2xl font-semibold mb-4">Accomplishments</h2>
         <p className="leading-relaxed text-lg text-gray-700">
-          Our goal is to create an automated solution that pulls budgets,
-          planned spend, actual spend, and invoice numbers into one place. The
-          platform will support filtering by market, division, channel, month,
-          and campaign. We aim to eliminate manual input, provide a dashboard
-          for visualization, and deliver accurate insights for the Chanel Media
-          and Finance teams.
+          The deployment of FinSync has successfully transformed Chanel's financial management approach, aligning with our initial vision to streamline and enhance financial operations. The platform could now become a critical tool for Chanel UK, driving efficiency and accuracy across financial departments.
         </p>
       </section>
     </div>

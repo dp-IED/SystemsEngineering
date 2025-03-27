@@ -4,7 +4,10 @@ import React, { ReactNode } from "react";
 import { ClerkProvider, RedirectToSignIn, useAuth } from "@clerk/nextjs";
 import NavigationBar from "../components/NavigationBar";
 import "./globals.css";
+import ChanelLogo from "@/images/chanel.jpg";
 import { Toaster } from "@/components/ui/toaster";
+import Image from 'next/image'; // Add this line
+
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn } = useAuth();
@@ -43,9 +46,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <ProtectedRoute>{children}</ProtectedRoute>
           </main>
           <Toaster />
-          <footer className="mt-4 p-4 bg-slate-900 text-white text-center sticky bottom-0 w-full">
-            © 2024 Chanel. All rights reserved.
-          </footer>
+          <footer className="mt-4 p-4 bg-slate-900 text-white flex justify-center items-center sticky bottom-0 w-full">
+    <span>© 2024 Chanel. All rights reserved.</span>
+    <Image
+      src={ChanelLogo}
+      alt="Chanel Logo"
+      width={50}
+      height={50}
+      className="object-contain ml-2"
+    />
+</footer>
+
+          
         </body>
       </html>
     </ClerkProvider>
