@@ -66,7 +66,7 @@ def test_process_budget_tracker(mock_blob_service_client):
             "Campaign (UK)": ["No. 5", "Coco Melle", "Skincare", "Campaign (UK)", "Travel Retail", "PPC", "Eyewear", "Campaign (ROI)", "Fashion", "Campaign (UK)", "Fine Jewellery"],
             "CHANEL Budget": ["100000", "50000", "320000", "1250000", "1350000", "25000", "2350", "3000", "25000", "5000", "12000"]
         })
-        df.to_excel(writer, sheet_name="Budget tracker 16.12.24", index=False)
+        df.to_excel(writer, sheet_name="Budget tracker", index=False)
     excel_data.seek(0)
  
     # Mock the blob download response
