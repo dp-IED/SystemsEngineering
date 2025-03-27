@@ -7,7 +7,7 @@ const Contact = () => {
     <div className="container mx-auto px-6 py-12">
       <h1 className="text-4xl font-bold mb-8 text-center">Contact Us</h1>
       <p className="text-lg text-gray-700 leading-relaxed mb-6 text-center">
-        Feel free to reach out to any of us via email or LinkedIn. We´re happy to assist you with the Chanel Media Dashboard or any inquiries.
+        Feel free to reach out to any of us via email or LinkedIn. We´re happy to assist you with the FinSync Dashboard or any inquiries.
       </p>
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-gray-100 p-4 rounded-lg shadow-md text-center">
