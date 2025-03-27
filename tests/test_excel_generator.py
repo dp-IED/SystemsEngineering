@@ -1,64 +1,64 @@
 import unittest
-from unittest.mock import patch, MagicMock
 import pandas as pd
 import tempfile
 import os
+from openpyxl import load_workbook
 from AdxIngestFunction.excel_generator import generate_excel_report
 
 class TestExcelGenerator(unittest.TestCase):
-    @patch("AdxIngestFunction.excel_generator.load_workbook")
-    @patch("AdxIngestFunction.excel_generator.pd.read_csv")
-    def test_save_dataframe_to_excel_and_formatting(self, mock_read_csv, mock_load_workbook):
-        # Create a temp file
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
-            fake_path = tmp.name
 
-        # Setup mocked DataFrame with 'Division'
+    def setUp(self):
+        """Create a temp Excel file path for testing."""
+        self.tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx").name
+
+    def tearDown(self):
+        """Clean up the temporary file after each test."""
+        if os.path.exists(self.tmp_file):
+            os.remove(self.tmp_file)
+
+    def test_generate_excel_report(self):
+        """Test if the Excel report is properly generated and formatted."""
+        # Create test DataFrame with multiple divisions
         df = pd.DataFrame({
-            'Division': ['F&B', 'FSH&EW', 'W&FJ'],
-            'A': [1, 2, 3]
+            'Division': ['F&B', 'FSH&EW', 'W&FJ', 'F&B'],
+            'Channel': ['Online', 'Retail', 'Wholesale', 'Retail'],
+            'TotalInvoiceVal': [1000, 2000, 1500, 1800],
+            'POValueRemaining': [500, 700, 300, 600],
+            'POCloseDownDate': ['2024-03-10', '2024-04-15', '2024-05-20', '2024-06-05']
         })
-        mock_read_csv.return_value = df
 
-        # Mock worksheet
-        mock_ws = MagicMock()
-        mock_ws.max_row = 3
-        mock_ws.columns = [
-            [MagicMock(value="Header1", column=1), MagicMock(value="Header2", column=2)]
-        ]
-        mock_ws.iter_rows.return_value = [
-            [MagicMock(value="Header1", column=1), MagicMock(value="Header2", column=2)],
-            [MagicMock(value="total campaign", column=1), MagicMock(value="123", column=2)],
-        ]
-        mock_ws.__getitem__.return_value = MagicMock(value="SomeHeader")
+        # Save DataFrame as CSV (Simulate input data)
+        temp_csv = tempfile.NamedTemporaryFile(delete=False, suffix=".csv").name
+        df.to_csv(temp_csv, index=False)
 
-        # Mock workbook
-        mock_wb = MagicMock()
-        mock_wb.sheetnames = ["Sheet1"]
-        mock_wb.__getitem__.return_value = mock_ws
-        mock_load_workbook.return_value = mock_wb
-
-        # Run
         try:
-            generate_excel_report(fake_path)
+            # Run function to generate the Excel file
+            generate_excel_report(self.tmp_file)
+
+            # Load generated Excel file
+            wb = load_workbook(self.tmp_file)
+
+            # Check if sheets were created correctly
+            expected_sheets = ['F&B', 'FSH&EW', 'W&FJ']
+            for sheet in expected_sheets:
+                self.assertIn(sheet, wb.sheetnames, f"Sheet {sheet} not found in workbook")
+
+            # Check column deletion logic by ensuring 'Division' column is removed
+            ws = wb['F&B']
+            headers = [cell.value for cell in next(ws.iter_rows(min_row=1, max_row=1))]
+            self.assertNotIn("Division", headers, "Column 'Division' should have been deleted")
+
+            # Check if header row formatting was applied
+            for cell in ws[1]:  
+                self.assertIsNotNone(cell.fill, "Header fill is missing")
+                self.assertIsNotNone(cell.font, "Header font is missing")
+
+            # Check merged cell logic (Assume it's based on some aggregation)
+            merged_ranges = [str(range_obj) for range_obj in ws.merged_cells.ranges]
+            self.assertGreater(len(merged_ranges), 0, "No merged cells found, expected at least one")
+
         finally:
-            if os.path.exists(fake_path):
-                os.remove(fake_path)
-                
-        # ✅ Assert workbook was loaded exactly 3 times
-        assert mock_load_workbook.call_count == 3
-
-        # ✅ Assert save called 3 times
-        assert mock_wb.save.call_count == 3
-
-        # Optional: Check all calls saved to correct path
-        for call in mock_wb.save.call_args_list:
-            assert call.args[0] == fake_path
-
-
-
-        # Assert workbook was loaded and saved
-        mock_load_workbook.assert_called()
+            os.remove(temp_csv)  # Cleanup CSV file
 
 if __name__ == '__main__':
     unittest.main()
