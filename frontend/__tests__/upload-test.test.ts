@@ -1,24 +1,55 @@
-//import { uploadFile } from "@/app/upload/actions";
-//import fs from "fs";
-//import path from "path";
+import { BlobServiceClient } from "@azure/storage-blob";
+import { uploadFile } from "@/app/upload/actions";
 
-//describe("File Upload", () => {
-//  it("should upload the controlled file to Azure Blob Storage", async () => {
-//    // Arrange: Read the controlled file
-//    const filePath = path.resolve(__dirname, "test-docs/Chanel UK Billed.xlsx");
-//    const fileBuffer = fs.readFileSync(filePath);
-//    const testFile = new File([fileBuffer], "Chanel UK Billed.xlsx");
 
-//    const formData = new FormData();
-//    formData.append("file", testFile);
+jest.mock("@azure/storage-blob", () => {
+  const originalModule = jest.requireActual("@azure/storage-blob");
 
-//    const result = await uploadFile(formData);
+  return {
+    ...originalModule,
+    BlobServiceClient: jest.fn(() => ({
+      getContainerClient: jest.fn(() => ({
+        getBlockBlobClient: jest.fn(() => ({
+          upload: jest.fn().mockResolvedValue({}),
+          url: "http://fake-url.com"
+        }))
+      }))
+    }))
+  };
+});
 
-//    if (!result.success) {
-//      console.error("File upload failed:", result.error || "Unknown error");
-//    }
+describe("File Upload", () => {
+    it("should successfully upload a file", async () => {
+      const mockFileContent = Buffer.from("Hello World");
+      const testFile = new File([mockFileContent], "test.xlsx");
+      const formData = new FormData();
+      formData.append("file", testFile);
+  
+      process.env.NEXT_PUBLIC_AZURE_STORAGE_CONNECTION_STRING = "fake-connection-string";
+  
+      // Call your actual function here
+      const result = await uploadFile(formData);
+  
+      expect(result.success).toBe(true);
+      expect(result.url).toBe("http://fake-url.com");
+    });
+  });
+  
 
-//    expect(result.success).toBe(true);
-//    expect(result.url).toContain("Chanel%20UK%20Billed.xlsx"); // url encoded filename
-//  });
-//});
+  // Jest manual mock setup for Azure Storage Blob
+jest.mock('@azure/storage-blob', () => {
+    return {
+      BlobServiceClient: {
+        fromConnectionString: jest.fn(() => ({
+          getContainerClient: jest.fn(() => ({
+            getBlockBlobClient: jest.fn(() => ({
+              upload: jest.fn().mockResolvedValue({}),
+              url: "http://fake-url.com"
+            }))
+          }))
+        }))
+      }
+    };
+  });
+  
+

@@ -60,7 +60,7 @@ def create_sample_excel_blob(file_type="billed"):
             "CHANEL Budget": ["100000", "50000", "320000", "1250000", "1350000", "25000", "2350", "3000", "25000", "5000", "12000"]
         })
         with pd.ExcelWriter(excel_data, engine="openpyxl") as writer:
-            df.to_excel(writer, sheet_name="Budget tracker 16.12.24", index=False)
+            df.to_excel(writer, sheet_name="Budget tracker", index=False)
     
     excel_data.seek(0)
     return excel_data.getvalue()
