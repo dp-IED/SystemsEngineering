@@ -4,24 +4,27 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { UserButton } from "@clerk/nextjs"; // Import Clerk's UserButton
-import ChanelLogo from "@/images/chanel.jpg";
+import FinsyncLogo from "@/images/finsync.png";
+
 
 const NavigationBar = () => {
   return (
     <nav className="bg-black text-white py-4">
+      
       <div className="container mx-auto flex justify-between items-center">
+        
         {/* Logo and Branding */}
         <Link href="/">
           <div className="flex items-center">
             <Image
-              src={ChanelLogo}
-              alt="Chanel Logo"
+              src={FinsyncLogo}
+              alt="FinSync Logo"
               width={50}
               height={50}
               className="object-contain mr-4"
             />
             <h1 className="text-lg font-bold tracking-wide uppercase">
-              Chanel Dashboard
+              FinSync Dashboard
             </h1>
           </div>
         </Link>
