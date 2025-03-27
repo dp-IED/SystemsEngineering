@@ -10,14 +10,16 @@ const About = () => {
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">Who We Are</h2>
         <p className="leading-relaxed text-lg text-gray-700">
-          We are Daren, Ines, Anika, and Aziret, four Computer Science graduates from University College London (UCL). In collaboration with Chanel, we have developed FinSync, a state-of-the-art platform designed to revolutionize Chanel's financial processes within their media and finance departments.
+          {/* escaping ' char */}
+          {"We are Daren, Ines, Anika, and Aziret, four Computer Science graduates from University College London (UCL). In collaboration with Chanel, we have developed FinSync, a state-of-the-art platform designed to revolutionize Chanel's financial processes within their media and finance departments."}
         </p>
       </section>
 
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">FinSync: Our Platform</h2>
         <p className="leading-relaxed text-lg text-gray-700">
-        FinSync automates and consolidates financial data handling, enhancing the efficiency and clarity of Chanel's financial operations. Here are the key functionalities now available on the platform:
+          {/* escaping ' char */}
+        {"FinSync automates and consolidates financial data handling, enhancing the efficiency and clarity of Chanel's financial operations. Here are the key functionalities now available on the platform:"}
         <ul className="list-disc list-inside text-lg text-gray-700">
             <li>Automated data aggregation of budgets, planned and actual spends, and invoice details.</li>
             <li>User-friendly dashboard featuring real-time financial tracking and decision-making support, complete with Excel previews and a variety of graphs for comprehensive visual analytics.  </li>
@@ -48,7 +50,8 @@ const About = () => {
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4">Accomplishments</h2>
         <p className="leading-relaxed text-lg text-gray-700">
-          The deployment of FinSync has successfully transformed Chanel's financial management approach, aligning with our initial vision to streamline and enhance financial operations. The platform could now become a critical tool for Chanel UK, driving efficiency and accuracy across financial departments.
+          {/* escaping ' char */}
+          {"The deployment of FinSync has successfully transformed Chanel's financial management approach, aligning with our initial vision to streamline and enhance financial operations. The platform could now become a critical tool for Chanel UK, driving efficiency and accuracy across financial departments."}
         </p>
       </section>
     </div>
